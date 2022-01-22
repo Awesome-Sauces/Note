@@ -16,4 +16,4 @@ After you are done running these commands in your terminal of choice, just run t
 ```./installer.sh```
 Finally after all this hard work, you have succesfully installed Note!
 Although when running the final command it will ask for your password.
-![Note-logos_black_wide](https://user-images.githubusercontent.com/78565561/150657036-5947089c-bca1-46b3-9794-71e7f31573e4.png)
+![Note-logos_black-Logo](https://user-images.githubusercontent.com/78565561/150656857-c89e1528-9f4b-4df2-bd51-c43456c720c0.png)
