@@ -6,7 +6,7 @@ I made a quick little script to install the latest version of Note for anyone wh
 First off to start you are going to want to run these commands in your terminal
 ```touch installer.sh```
 Replace the raw file with your Linux Operating system.
-For this example we will use the ArchLinux Installer\n
+For this example we will use the ArchLinux Installer
 ```curl https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/installing/ArchLinuxInstaller.sh > installer.sh```
 Run this to allow executing file as program
 ```sudo chmod u+x installer.sh```
