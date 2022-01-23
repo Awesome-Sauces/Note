@@ -8,7 +8,7 @@ ls
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/note.go
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/go.mod
 go build note.go
-sudo cp note /usr/bin
+sudo mv note /usr/bin
 rm note.go
 rm go.mod
 else
@@ -25,7 +25,7 @@ source ~/.bashrc
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/note.go
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/go.mod
 go build note.go
-sudo cp note /usr/bin
+sudo mv note /usr/bin
 rm note.go
 rm go.mod
 fi
