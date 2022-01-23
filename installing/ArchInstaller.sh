@@ -1,7 +1,7 @@
 #!/bin/bash
-echo "Installing Note"
-x=`pacman -Qs go`
-if [ -n "$x" ]
+pkg="go"
+which $pkg > /dev/null 2>&1
+if [ $? == 0 ]
 then
     touch note.go
     touch go.mod
@@ -13,6 +13,9 @@ then
     rm note.go
     rm go.mod
 else
+    read -p "Golang is not installed. Would you like to install it? y/n " request
+if  [ $request == "y" ]
+then
     sudo pacman -S go
     touch note.go
     touch go.mod
@@ -23,4 +26,5 @@ else
     sudo mv note /usr/bin
     rm note.go
     rm go.mod
+fi
 fi
