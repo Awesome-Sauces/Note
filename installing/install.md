@@ -10,18 +10,17 @@ First off to start you are going to want to run these commands in your terminal
 
 For Ubuntu do this
 
-    touch installer.sh
     wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/installing/DebianInstaller.sh
 
 Replace the raw file link with your Linux Operating system Installer.
 For this example we will use the ArchLinux Installer,
 run this to allow executing file as program
 
-    sudo chmod u+x installer.sh
+    sudo chmod u+x ArchLinuxInstaller.sh
 
 After you are done running these commands in your terminal of choice, just run this final command.
 ```
-./ArchLinuxInstaller.sh
+sudo ./ArchLinuxInstaller.sh
 ```
 Finally after all this hard work, you have succesfully installed Note!
 **Although when running the final command it will ask for your password.**
