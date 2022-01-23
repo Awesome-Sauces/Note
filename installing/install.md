@@ -1,4 +1,5 @@
 # Installing
+## Please be careful to be in the Downloads directory when installing otherwise it wont work!
 ___
 
 Installing Note is a really easy task to do!
