@@ -3,7 +3,6 @@ echo "Installing Note"
 x=`pacman -Qs go`
 if [ -n "$x" ]
 then
-    sudo pacman -S go
     touch note.go
     touch go.mod
     // Grabs Newest version of Note
@@ -14,6 +13,7 @@ then
     rm note.go
     rm go.mod
 else
+    sudo pacman -S go
     touch note.go
     touch go.mod
     // Grabs Newest version of Note
