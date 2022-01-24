@@ -5,8 +5,8 @@ if [ $? == 0 ]
 then
 ls
 # Grabs Newest version of Note
-wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/note.go
-wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/go.mod
+wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go
+wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod
 go build note.go
 sudo mv note /usr/bin
 rm note.go
@@ -22,8 +22,8 @@ sudo mv go /usr/local
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
 source ~/.bashrc
 # Grabs Newest version of Note
-wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/note.go
-wget https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/go.mod
+wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go
+wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod
 go build note.go
 sudo mv note /usr/bin
 rm note.go

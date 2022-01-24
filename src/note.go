@@ -6,22 +6,29 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"time"
+	"unicode/utf8"
 )
 
 var clear map[string]func() //create a map for storing clear funcs
-var CURRENT_CURSOR_POSITION int
+var rmvStr string
+var position int
+var lstr string
+var rstr string
+var str string
 
-type ArrowKeys struct {
-	// Up Arrow/Down Arrow/Left Arrow/Right Arrow
-	KEYTYPE string
-	// Text to the left of mouse pointer
-	STABLE string
-	// Text to the right of mouse pointer
-	ADD string
-}
+// COLORS map of colors for terminal
+var COLORS map[string]string
 
 func init() {
+	COLORS = make(map[string]string)
+	COLORS["colorReset"] = "\033[0m"
+	COLORS["colorRed"] = "\033[31m"
+	COLORS["colorGreen"] = "\033[32m"
+	COLORS["colorYellow"] = "\033[33m"
+	COLORS["colorBlue"] = "\033[34m"
+	COLORS["colorPurple"] = "\033[35m"
+	COLORS["colorCyan"] = "\033[36m"
+	COLORS["colorWhite"] = "\033[37m"
 	clear = make(map[string]func()) //Initialize it
 	clear["linux"] = func() {
 		cmd := exec.Command("clear") //Linux example, its tested
@@ -30,16 +37,21 @@ func init() {
 	}
 }
 
+func trimFirstRune(s string) string {
+	_, i := utf8.DecodeRuneInString(s)
+	return s[i:]
+}
+
 func main() {
+	CheckArgs()
 	// Creating ASCII key
 	CallClear()
 	ASCII := Symbols()
-	var str string
-	dat, err := os.ReadFile(".txt")
-	str += string(dat)
+	dat, err := os.ReadFile(os.Args[1])
+	str = string(dat)
+	position = len(str)
 	check(err)
 	// Setting Cursor position to the end of file text
-	CURRENT_CURSOR_POSITION = len(str)
 	// disable input buffering
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
 	// Hide Text
@@ -48,12 +60,11 @@ func main() {
 	for {
 		b[1] = 0
 		b[2] = 0
+		LiveUpdate("NULL", "Update")
 		os.Stdin.Read(b)
-		LiveUpdate(str)
 		switch ASCII[int(b[0])] {
 		case "SPACE":
-			str += " "
-			LiveUpdate(str)
+			LiveUpdate(" ", "AddChar")
 		case "ESC":
 			X := ASCII[int(b[0])]
 			Y := ASCII[int(b[1])]
@@ -61,48 +72,172 @@ func main() {
 			if X == "ESC" {
 				if Y == "[" {
 					if Z == "A" {
-						go MousePointerLocationCalc("UP_ARROW", str)
+						ArrowUp()
+						LiveUpdate("NULL", "Update")
+						//go MousePointerLocationCalc("UP_ARROW", str)
 					} else if Z == "B" {
-						go MousePointerLocationCalc("DOWN_ARROW", str)
+						ArrowDown()
+						LiveUpdate("NULL", "Update")
+						//go MousePointerLocationCalc("DOWN_ARROW", str)
 					} else if Z == "D" {
-						go MousePointerLocationCalc("LEFT_ARROW", str)
+						position--
+						if position == -1 {
+							position++
+						}
+						process()
+						LiveUpdate("NULL", "Update")
+
+						//go MousePointerLocationCalc("LEFT_ARROW", str)
 					} else {
-						go MousePointerLocationCalc("RIGHT_ARROW", str)
+						position++
+						if position == len(str)+1 {
+							position--
+						}
+						process()
+						LiveUpdate("NULL", "Update")
+						//go MousePointerLocationCalc("RIGHT_ARROW", str)
 					}
 				} else {
+					process()
 					// Un-hide Text
 					exec.Command("stty", "-F", "/dev/tty", "echo").Run()
+					// Save changes to file
+					overWrite()
 					CallClear()
-					fmt.Println(strings.Contains(str, "\n"))
 					os.Exit(3)
 				}
 
 			}
 
 		case "TAB":
-			str += "	"
-			LiveUpdate(str)
+			LiveUpdate("	", "AddChar")
 		case "LF":
-			str += "\n"
-			LiveUpdate(str)
+			LiveUpdate("\n", "AddChar")
 		case "DEL":
-			if len(str) == 0 {
-				time.Sleep(1 * time.Millisecond)
-				LiveUpdate(str)
-			} else {
-				if str[len(str)-1:len(str)] == "\n" {
-					fmt.Println("Hi newline bro")
-					time.Sleep(1000 * time.Millisecond)
-				}
-				str = strings.TrimSuffix(str, str[len(str)-1:len(str)])
-				LiveUpdate(str)
-			}
+			process()
+			LiveUpdate("NULL", "DelChar")
 		default:
-			str += ASCII[int(b[0])]
-			LiveUpdate(str)
+			LiveUpdate(ASCII[int(b[0])], "AddChar")
 		}
 
 	}
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func CallClear() {
+	value, ok := clear[runtime.GOOS] //runtime.GOOS -> linux, windows, darwin etc.
+	if ok {                          //if we defined a clear func for that platform:
+		value() //we execute it
+	} else { //unsupported platform
+		panic("Your platform is unsupported! I can't clear terminal screen :(")
+	}
+}
+
+func LiveUpdate(still string, UpdateType string) int {
+	// I have no idea how to make live text without it being buggy/using 3rd party libraries
+	//fmt.Printf("\033[0;0H")
+	switch UpdateType {
+	case "AddChar":
+		position++
+		str = lstr + still + rstr
+		process()
+		CallClear()
+		process()
+		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+	case "DelChar":
+		process()
+		str = lstr + trimFirstRune(rstr)
+		position--
+		process()
+		CallClear()
+		if position == -1 {
+			position++
+		}
+		LiveUpdate("NULL", "Update")
+		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+	case "Update":
+		process()
+		CallClear()
+		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+		return 0
+	}
+	return 0
+}
+
+func overWrite() {
+	d1 := []byte(str)
+	err := os.WriteFile(os.Args[1], d1, 0644)
+	check(err)
+}
+
+func process() int {
+	if position > len(str) {
+		return 0
+	} else if position < 0 {
+		return 0
+	} else {
+		lstr = str[0:position]
+		rstr = str[position:len(str)]
+		fmt.Println(len(rstr))
+		if len(rstr) == 0 {
+			return 0
+		} else {
+			rmvStr = rstr[0:1]
+		}
+		return 0
+	}
+
+}
+
+func CheckArgs() {
+	if len(os.Args) < 1 {
+		os.Exit(3)
+	}
+}
+
+func ArrowUp() int {
+	// Making map for storing where all the NewLine characters are located.
+	NewLinePosition := make(map[int]int)
+	// Finding all NewLine Characters start from position
+	for loopy := 0; loopy <= 0; loopy++ {
+		for iter := position; iter >= 1; iter-- {
+			if strings.Contains(str[iter-1:iter], "\n") == true {
+				NewLinePosition[len(NewLinePosition)] = iter
+			}
+		}
+		// Setting the New position
+		if NewLinePosition[0]-1 > len(str) {
+			return 0
+		} else if NewLinePosition[0]-1 < 0 {
+			return 0
+		} else {
+			position = NewLinePosition[0] - 1
+			for k := range NewLinePosition {
+				delete(NewLinePosition, k)
+			}
+		}
+
+	}
+	return 0
+}
+
+func ArrowDown() int {
+	for location := position; location <= len(str); location++ {
+		if strings.Contains(str[location-1:location], "\n") == true {
+			if location+1 > len(str) {
+				return 0
+			} else {
+				position = location + 1
+			}
+			return 0
+		}
+	}
+	return 0
 }
 
 func Symbols() map[int]string {
@@ -237,33 +372,4 @@ func Symbols() map[int]string {
 	symbols[127] = "DEL"
 
 	return symbols
-}
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
-func CallClear() {
-	value, ok := clear[runtime.GOOS] //runtime.GOOS -> linux, windows, darwin etc.
-	if ok {                          //if we defined a clear func for that platform:
-		value() //we execute it
-	} else { //unsupported platform
-		panic("Your platform is unsupported! I can't clear terminal screen :(")
-	}
-}
-
-func LiveUpdate(str string) {
-	// I have no idea how to make live text without it being buggy/using 3rd party libraries
-	//fmt.Printf("\033[0;0H")
-	CallClear()
-	fmt.Println(str)
-}
-
-func MousePointerLocationCalc(kt string, str string) *ArrowKeys {
-	location := ArrowKeys{KEYTYPE: kt}
-	location.STABLE = ""
-	location.ADD = ""
-	return &location
 }

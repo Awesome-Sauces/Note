@@ -6,8 +6,8 @@ then
     touch note.go
     touch go.mod
     // Grabs Newest version of Note
-    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/note.go > note.go
-    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/go.mod > go.mod
+    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go > note.go
+    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod > go.mod
     go build note.go
     sudo mv note /usr/bin
     rm note.go
@@ -20,8 +20,8 @@ then
     touch note.go
     touch go.mod
     // Grabs Newest version of Note
-    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/note.go > note.go
-    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/Note-v1.0.0-BETA/src/go.mod > go.mod
+    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go > note.go
+    curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod > go.mod
     go build note.go
     sudo mv note /usr/bin
     rm note.go
