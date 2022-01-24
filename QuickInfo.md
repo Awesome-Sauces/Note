@@ -2,4 +2,5 @@
 ___
 First off the place where text is written is to the left of this character **|**,
 and the place in which text in deleted it is to the right of **|**.
+Press **ESC** key to save and quit
 Have fun using Note! (This will change overtime this is just a rough version!)
