@@ -1,0 +1,25 @@
+{
+    "TextColor": [
+      {
+        "ColorRed":"false",
+        "ColorGreen": "false",
+        "ColorYellow": "false",
+        "ColorBlue": "false",
+        "ColorPurple": "true",
+        "ColorCyan" : "false",
+        "ColorWhite" : "true"
+      }
+    ],
+    "CursorColor": [
+  
+      {
+        "ColorRed":"false",
+        "ColorGreen": "false",
+        "ColorYellow": "false",
+        "ColorBlue": "false",
+        "ColorPurple": "true",
+        "ColorCyan" : "false",
+        "ColorWhite" : "false"
+      }
+    ]
+  }
