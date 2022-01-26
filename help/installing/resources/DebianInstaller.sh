@@ -11,6 +11,8 @@ go build note.go
 sudo mv note /usr/bin
 rm note.go
 rm go.mod
+sudo mkdir /note
+(cd \\note; wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/colorConfig.json)
 else
     read -p "Golang is not installed. Would you like to install it? y/n : " request
 if  [ $request == "y" ]
@@ -31,5 +33,7 @@ go build note.go
 sudo mv note /usr/bin
 rm note.go
 rm go.mod
+sudo mkdir /note
+(cd \\note; wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/colorConfig.json)
 fi
 fi

@@ -276,7 +276,7 @@ func ArrowDown() int {
 
 func LoadColorConfig() {
 	// Open our jsonFile
-	jsonFile, err := os.Open("colorConf.json")
+	jsonFile, err := os.Open("/note/colorConfig.json")
 	check(err)
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
