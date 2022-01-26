@@ -20,7 +20,7 @@ run this to allow executing file as program
 
 After you are done running these commands in your terminal of choice, just run this final command.
 ```
-sudo ./ArchInstaller.sh
+./ArchInstaller.sh
 ```
 Finally after all this hard work, you have succesfully installed Note!
 **Although when running the final command it will ask for your password.**

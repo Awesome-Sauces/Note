@@ -35,6 +35,16 @@ func init() {
 		cmd.Stdout = os.Stdout
 		cmd.Run()
 	}
+	clear["windows"] = func() {
+        cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested 
+        cmd.Stdout = os.Stdout
+        cmd.Run()
+    }
+	clear["mac"] = func() {
+        cmd := exec.Command("clear") //Windows example, its tested 
+        cmd.Stdout = os.Stdout
+        cmd.Run()
+    }
 }
 
 func trimFirstRune(s string) string {
@@ -140,15 +150,15 @@ func CallClear() {
 
 func LiveUpdate(still string, UpdateType string) int {
 	// I have no idea how to make live text without it being buggy/using 3rd party libraries
-	//fmt.Printf("\033[0;0H")
 	switch UpdateType {
+	// This case adds a character to the file!
 	case "AddChar":
 		position++
 		str = lstr + still + rstr
 		process()
 		CallClear()
-		process()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+	// This case deletes a character from the file. (This was way harder than supposed too)
 	case "DelChar":
 		process()
 		str = lstr + trimFirstRune(rstr)
@@ -159,11 +169,12 @@ func LiveUpdate(still string, UpdateType string) int {
 			position++
 		}
 		LiveUpdate("NULL", "Update")
-		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+	// This case just updates the text in terminal
 	case "Update":
 		process()
 		CallClear()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
 		return 0
 	}
 	return 0
