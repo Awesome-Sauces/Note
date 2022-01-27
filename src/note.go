@@ -15,6 +15,7 @@ var position int
 var lstr string
 var rstr string
 var str string
+var ResetColor string
 
 // CursorColorGlobal Text Customization variables
 var CursorColorGlobal string
@@ -75,6 +76,7 @@ func init() {
 	// colorWhite
 	ColorMap[6] = "\033[37m"
 	LoadColorConfig()
+	ResetColor = "\033[0m"
 	CursorColorGlobal, TextColorGlobal = FindColorConfig()
 }
 
@@ -143,6 +145,7 @@ func main() {
 					// Save changes to file
 					overWrite()
 					CallClear()
+					fmt.Printf("%s", ResetColor)
 					os.Exit(3)
 				}
 
@@ -182,22 +185,21 @@ func LiveUpdate(still string, UpdateType string) int {
 		str = lstr + still + rstr
 		process()
 		CallClear()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s", CursorColorGlobal, lstr, TextColorGlobal, rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
 	case "DelChar":
 		process()
 		str = lstr + trimFirstChar(rstr)
-		position--
+		//position--
 		process()
 		CallClear()
 		if position == -1 {
 			position++
 		}
-		LiveUpdate("NULL", "Update")
-		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s", CursorColorGlobal, lstr, TextColorGlobal, rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
 	case "Update":
 		process()
 		CallClear()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s", CursorColorGlobal, lstr, TextColorGlobal, rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
 		return 0
 	}
 	return 0
@@ -230,8 +232,10 @@ func process() int {
 
 func CheckArgs() {
 	if os.Args[1] == "--help" {
+		CallClear()
 		fmt.Printf("Note v1.1.1\n\n")
 		fmt.Printf("note --help\n")
+		fmt.Printf("note FILENAME\n")
 		fmt.Printf("-----------\n")
 		fmt.Printf("All the Cursor-COLOR tags\n")
 		fmt.Printf("Cursor-Red\n")
@@ -256,9 +260,11 @@ func CheckArgs() {
 		fmt.Printf("Text-NONE\n")
 		fmt.Printf("-----------\n")
 		fmt.Printf("Example: note Text-White Cursor-Purple\n")
+		os.Exit(1)
 	} else {
-		if len(os.Args) > 1 {
+		if len(os.Args) >= 3 {
 			processor(os.Args[1], os.Args[2])
+			os.Exit(3)
 		} else if len(os.Args) < 2 {
 			os.Exit(3)
 		} else if len(os.Args) < 1 {
@@ -310,7 +316,7 @@ func ArrowDown() int {
 
 func LoadColorConfig() {
 	// Open our jsonFile
-	jsonFile, err := os.Open("/note/colorConfig.json")
+	jsonFile, err := os.Open("~/colorConfig.json")
 	check(err)
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
@@ -368,17 +374,17 @@ func Symbols() map[int]string {
 	symbols[2] = "STX"
 	symbols[3] = "ETX"
 	symbols[4] = "EOT"
-	symbols[5] = "EOT"
-	symbols[6] = "ENQ"
-	symbols[7] = "ACK"
-	symbols[8] = "BEL"
-	symbols[9] = "BS"
-	symbols[10] = "TAB"
-	symbols[11] = "LF"
-	symbols[12] = "VT"
-	symbols[13] = "FF"
-	symbols[14] = "CR"
-	symbols[15] = "SO"
+	symbols[5] = "ENQ"
+	symbols[6] = "ACK"
+	symbols[7] = "BEL"
+	symbols[8] = "BS"
+	symbols[9] = "TAB"
+	symbols[10] = "LF"
+	symbols[11] = "VT"
+	symbols[12] = "FF"
+	symbols[13] = "CR"
+	symbols[14] = "SO"
+	symbols[15] = "SI"
 	symbols[16] = "DLE"
 	symbols[17] = "DC1"
 	symbols[18] = "DC2"
@@ -490,7 +496,7 @@ func Symbols() map[int]string {
 	symbols[124] = "|"
 	symbols[125] = "}"
 	symbols[126] = "~"
-	symbols[127] = ""
+	symbols[127] = "DEL"
 
 	return symbols
 }
@@ -602,7 +608,7 @@ func ChangeColor(valueA string, valueB string, valueC string, valueD string, val
 }`
 
 	d1 := []byte(str)
-	err := os.WriteFile("/note/colorConfig.json", d1, 0644)
+	err := os.WriteFile("~/colorConfig.json", d1, 0644)
 	if err != nil {
 		return
 	}
