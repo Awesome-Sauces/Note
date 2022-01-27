@@ -15,7 +15,8 @@ var position int
 var lstr string
 var rstr string
 var str string
-// Text Customization variables
+
+// CursorColorGlobal Text Customization variables
 var CursorColorGlobal string
 var TextColorGlobal string
 var CursorColorConfig map[int]string
@@ -84,7 +85,6 @@ func trimFirstChar(s string) string {
 
 func main() {
 	CheckArgs()
-	// Creating ASCII key
 	CallClear()
 	ASCII := Symbols()
 	dat, err := os.ReadFile(os.Args[1])
@@ -96,7 +96,7 @@ func main() {
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
 	// Hide Text
 	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-	var b []byte = make([]byte, 3)
+	var b = make([]byte, 3)
 	for {
 		b[1] = 0
 		b[2] = 0
@@ -229,9 +229,43 @@ func process() int {
 }
 
 func CheckArgs() {
-	if len(os.Args) < 1 {
-		os.Exit(3)
+	if os.Args[1] == "--help" {
+		fmt.Printf("Note v1.1.1\n\n")
+		fmt.Printf("note --help\n")
+		fmt.Printf("-----------\n")
+		fmt.Printf("All the Cursor-COLOR tags\n")
+		fmt.Printf("Cursor-Red\n")
+		fmt.Printf("Cursor-Green\n")
+		fmt.Printf("Cursor-Yellow\n")
+		fmt.Printf("Cursor-Blue\n")
+		fmt.Printf("Cursor-Purple\n")
+		fmt.Printf("Cursor-Cyan\n")
+		fmt.Printf("Cursor-White\n")
+		fmt.Printf("Cursor-SAME\n")
+		fmt.Printf("Cursor-NONE\n")
+		fmt.Printf("-----------\n")
+		fmt.Printf("All the Text-COLOR tags\n")
+		fmt.Printf("Text-Red\n")
+		fmt.Printf("Text-Green\n")
+		fmt.Printf("Text-Yellow\n")
+		fmt.Printf("Text-Blue\n")
+		fmt.Printf("Text-Purple\n")
+		fmt.Printf("Text-Cyan\n")
+		fmt.Printf("Text-White\n")
+		fmt.Printf("Text-SAME\n")
+		fmt.Printf("Text-NONE\n")
+		fmt.Printf("-----------\n")
+		fmt.Printf("Example: note Text-White Cursor-Purple\n")
+	} else {
+		if len(os.Args) > 1 {
+			processor(os.Args[1], os.Args[2])
+		} else if len(os.Args) < 2 {
+			os.Exit(3)
+		} else if len(os.Args) < 1 {
+			os.Exit(3)
+		}
 	}
+
 }
 
 func ArrowUp() int {
@@ -459,4 +493,117 @@ func Symbols() map[int]string {
 	symbols[127] = ""
 
 	return symbols
+}
+
+func processor(Arg1 string, Arg2 string) {
+	// colorRed
+	// colorGreen
+	// colorYellow
+	// colorBlue
+	// colorPurple
+	// colorCyan
+	// colorWhite
+	switch Arg1 {
+	case "Text-Red":
+		LoadColorConfig()
+		ChangeColor("true", "false", "false", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Green":
+		LoadColorConfig()
+		ChangeColor("false", "true", "false", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Yellow":
+		LoadColorConfig()
+		ChangeColor("false", "false", "true", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Blue":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "true", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Purple":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "true", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Cyan":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "false", "true", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-White":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "false", "false", "true", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-NONE":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-SAME":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	default:
+		fmt.Println("Please Provide the Following Format when using note to change colorConfig.json:")
+		fmt.Println("note Test-COLOR Cursor-COLOR")
+		fmt.Println("Use note --help for help")
+		os.Exit(1)
+	}
+
+	switch Arg2 {
+	case "Cursor-Red":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "true", "false", "false", "false", "false", "false", "false")
+	case "Cursor-Green":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "true", "false", "false", "false", "false", "false")
+	case "Cursor-Yellow":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "true", "false", "false", "false", "false")
+	case "Cursor-Blue":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "true", "false", "false", "false")
+	case "Cursor-Purple":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "true", "false", "false")
+	case "Cursor-Cyan":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "false", "true", "false")
+	case "Cursor-White":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "false", "false", "true")
+	case "Cursor-NONE":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "false", "false", "false")
+	case "Cursor-SAME":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	default:
+		fmt.Println("Please Provide the Following Format when using note to change colorConfig.json:")
+		fmt.Println("note Test-COLOR Cursor-COLOR")
+		fmt.Println("Use note --help for help")
+		os.Exit(1)
+	}
+
+}
+
+func ChangeColor(valueA string, valueB string, valueC string, valueD string, valueE string, valueF string, valueG string, valueH string, valueI string, valueJ string, valueK string, valueL string, valueM string, valueN string) {
+	str := `{
+  "TextColor": [
+    {
+      "ColorRed":"` + valueA + `",
+      "ColorGreen":"` + valueB + `",
+      "ColorYellow":"` + valueC + `",
+      "ColorBlue":"` + valueD + `",
+      "ColorPurple":"` + valueE + `",
+      "ColorCyan" :"` + valueF + `",
+      "ColorWhite" :"` + valueG + `"
+    }
+  ],
+  "CursorColor": [
+    {
+      "ColorRed":"` + valueH + `",
+      "ColorGreen":"` + valueI + `",
+      "ColorYellow":"` + valueJ + `",
+      "ColorBlue":"` + valueK + `",
+      "ColorPurple":"` + valueL + `",
+      "ColorCyan" :"` + valueM + `",
+      "ColorWhite" :"` + valueN + `"
+    }
+  ]
+}`
+
+	d1 := []byte(str)
+	err := os.WriteFile("/note/colorConfig.json", d1, 0644)
+	if err != nil {
+		return
+	}
 }
