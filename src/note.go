@@ -1,60 +1,90 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"unicode/utf8"
 )
 
-var clear map[string]func() //create a map for storing clear funcs
 var rmvStr string
 var position int
 var lstr string
 var rstr string
 var str string
 
-// COLORS map of colors for terminal
-var COLORS map[string]string
+// CursorColorGlobal Text Customization variables
+var CursorColorGlobal string
+var TextColorGlobal string
+var CursorColorConfig map[int]string
+var CursorTextConfig map[int]string
+var ColorMap map[int]string
 
-func init() {
-	COLORS = make(map[string]string)
-	COLORS["colorReset"] = "\033[0m"
-	COLORS["colorRed"] = "\033[31m"
-	COLORS["colorGreen"] = "\033[32m"
-	COLORS["colorYellow"] = "\033[33m"
-	COLORS["colorBlue"] = "\033[34m"
-	COLORS["colorPurple"] = "\033[35m"
-	COLORS["colorCyan"] = "\033[36m"
-	COLORS["colorWhite"] = "\033[37m"
-	clear = make(map[string]func()) //Initialize it
-	clear["linux"] = func() {
-		cmd := exec.Command("clear") //Linux example, its tested
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
-	clear["windows"] = func() {
-        cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested 
-        cmd.Stdout = os.Stdout
-        cmd.Run()
-    }
-	clear["mac"] = func() {
-        cmd := exec.Command("clear") //Windows example, its tested 
-        cmd.Stdout = os.Stdout
-        cmd.Run()
-    }
+// TextColorBools struct
+type TextColorBools struct {
+	TextColor []TextColor `json:"TextColor"`
 }
 
-func trimFirstRune(s string) string {
+// CursorColorBools struct
+type CursorColorBools struct {
+	CursorColor []CursorColor `json:"CursorColor"`
+}
+
+// TextColor struct for colorConfig.json, Purely cosmetics
+type TextColor struct {
+	ColorRed    string `json:"ColorRed"`
+	ColorGreen  string `json:"ColorGreen"`
+	ColorYellow string `json:"ColorYellow"`
+	ColorBlue   string `json:"ColorBlue"`
+	ColorPurple string `json:"ColorPurple"`
+	ColorCyan   string `json:"ColorCyan"`
+	ColorWhite  string `json:"ColorWhite"`
+}
+
+// CursorColor struct for colorConfig.json, Purely cosmetics
+type CursorColor struct {
+	ColorRed    string `json:"ColorRed"`
+	ColorGreen  string `json:"ColorGreen"`
+	ColorYellow string `json:"ColorYellow"`
+	ColorBlue   string `json:"ColorBlue"`
+	ColorPurple string `json:"ColorPurple"`
+	ColorCyan   string `json:"ColorCyan"`
+	ColorWhite  string `json:"ColorWhite"`
+}
+
+func init() {
+	// Setting up Maps for Text & cursor color Customization
+	CursorColorConfig = make(map[int]string)
+	CursorTextConfig = make(map[int]string)
+	ColorMap = make(map[int]string)
+	// colorRed
+	ColorMap[0] = "\033[31m"
+	// colorGreen
+	ColorMap[1] = "\033[32m"
+	// colorYellow
+	ColorMap[2] = "\033[33m"
+	// colorBlue
+	ColorMap[3] = "\033[34m"
+	// colorPurple
+	ColorMap[4] = "\033[35m"
+	// colorCyan
+	ColorMap[5] = "\033[36m"
+	// colorWhite
+	ColorMap[6] = "\033[37m"
+	LoadColorConfig()
+	CursorColorGlobal, TextColorGlobal = FindColorConfig()
+}
+
+func trimFirstChar(s string) string {
 	_, i := utf8.DecodeRuneInString(s)
 	return s[i:]
 }
 
 func main() {
 	CheckArgs()
-	// Creating ASCII key
 	CallClear()
 	ASCII := Symbols()
 	dat, err := os.ReadFile(os.Args[1])
@@ -66,7 +96,7 @@ func main() {
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
 	// Hide Text
 	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-	var b []byte = make([]byte, 3)
+	var b = make([]byte, 3)
 	for {
 		b[1] = 0
 		b[2] = 0
@@ -82,30 +112,29 @@ func main() {
 			if X == "ESC" {
 				if Y == "[" {
 					if Z == "A" {
+						// Up arrow detection and action
 						ArrowUp()
 						LiveUpdate("NULL", "Update")
-						//go MousePointerLocationCalc("UP_ARROW", str)
 					} else if Z == "B" {
+						// Down arrow detection and action
 						ArrowDown()
 						LiveUpdate("NULL", "Update")
-						//go MousePointerLocationCalc("DOWN_ARROW", str)
 					} else if Z == "D" {
+						// Left arrow detection and action
 						position--
 						if position == -1 {
 							position++
 						}
 						process()
 						LiveUpdate("NULL", "Update")
-
-						//go MousePointerLocationCalc("LEFT_ARROW", str)
 					} else {
+						// Right arrow detection and action
 						position++
 						if position == len(str)+1 {
 							position--
 						}
 						process()
 						LiveUpdate("NULL", "Update")
-						//go MousePointerLocationCalc("RIGHT_ARROW", str)
 					}
 				} else {
 					process()
@@ -140,28 +169,23 @@ func check(e error) {
 }
 
 func CallClear() {
-	value, ok := clear[runtime.GOOS] //runtime.GOOS -> linux, windows, darwin etc.
-	if ok {                          //if we defined a clear func for that platform:
-		value() //we execute it
-	} else { //unsupported platform
-		panic("Your platform is unsupported! I can't clear terminal screen :(")
-	}
+	cmd := exec.Command("clear") // Works on Linux and Mac, its tested
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 }
 
 func LiveUpdate(still string, UpdateType string) int {
 	// I have no idea how to make live text without it being buggy/using 3rd party libraries
 	switch UpdateType {
-	// This case adds a character to the file!
 	case "AddChar":
 		position++
 		str = lstr + still + rstr
 		process()
 		CallClear()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
-	// This case deletes a character from the file. (This was way harder than supposed too)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s", CursorColorGlobal, lstr, TextColorGlobal, rstr)
 	case "DelChar":
 		process()
-		str = lstr + trimFirstRune(rstr)
+		str = lstr + trimFirstChar(rstr)
 		position--
 		process()
 		CallClear()
@@ -169,12 +193,11 @@ func LiveUpdate(still string, UpdateType string) int {
 			position++
 		}
 		LiveUpdate("NULL", "Update")
-		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
-	// This case just updates the text in terminal
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s", CursorColorGlobal, lstr, TextColorGlobal, rstr)
 	case "Update":
 		process()
 		CallClear()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", COLORS["colorWhite"], lstr, COLORS["colorPurple"], COLORS["colorWhite"], rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s", CursorColorGlobal, lstr, TextColorGlobal, rstr)
 		return 0
 	}
 	return 0
@@ -206,9 +229,43 @@ func process() int {
 }
 
 func CheckArgs() {
-	if len(os.Args) < 1 {
-		os.Exit(3)
+	if os.Args[1] == "--help" {
+		fmt.Printf("Note v1.1.1\n\n")
+		fmt.Printf("note --help\n")
+		fmt.Printf("-----------\n")
+		fmt.Printf("All the Cursor-COLOR tags\n")
+		fmt.Printf("Cursor-Red\n")
+		fmt.Printf("Cursor-Green\n")
+		fmt.Printf("Cursor-Yellow\n")
+		fmt.Printf("Cursor-Blue\n")
+		fmt.Printf("Cursor-Purple\n")
+		fmt.Printf("Cursor-Cyan\n")
+		fmt.Printf("Cursor-White\n")
+		fmt.Printf("Cursor-SAME\n")
+		fmt.Printf("Cursor-NONE\n")
+		fmt.Printf("-----------\n")
+		fmt.Printf("All the Text-COLOR tags\n")
+		fmt.Printf("Text-Red\n")
+		fmt.Printf("Text-Green\n")
+		fmt.Printf("Text-Yellow\n")
+		fmt.Printf("Text-Blue\n")
+		fmt.Printf("Text-Purple\n")
+		fmt.Printf("Text-Cyan\n")
+		fmt.Printf("Text-White\n")
+		fmt.Printf("Text-SAME\n")
+		fmt.Printf("Text-NONE\n")
+		fmt.Printf("-----------\n")
+		fmt.Printf("Example: note Text-White Cursor-Purple\n")
+	} else {
+		if len(os.Args) > 1 {
+			processor(os.Args[1], os.Args[2])
+		} else if len(os.Args) < 2 {
+			os.Exit(3)
+		} else if len(os.Args) < 1 {
+			os.Exit(3)
+		}
 	}
+
 }
 
 func ArrowUp() int {
@@ -251,6 +308,59 @@ func ArrowDown() int {
 	return 0
 }
 
+func LoadColorConfig() {
+	// Open our jsonFile
+	jsonFile, err := os.Open("/note/colorConfig.json")
+	check(err)
+	// defer the closing of our jsonFile so that we can parse it later on
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	var TxtClr TextColorBools
+	var CursorClr CursorColorBools
+
+	// we unmarshal our byteArray
+	err = json.Unmarshal(byteValue, &TxtClr)
+	check(err)
+	err = json.Unmarshal(byteValue, &CursorClr)
+	check(err)
+
+	for i := 0; i < len(TxtClr.TextColor); i++ {
+		CursorTextConfig[0] = TxtClr.TextColor[i].ColorRed
+		CursorTextConfig[1] = TxtClr.TextColor[i].ColorGreen
+		CursorTextConfig[2] = TxtClr.TextColor[i].ColorYellow
+		CursorTextConfig[3] = TxtClr.TextColor[i].ColorBlue
+		CursorTextConfig[4] = TxtClr.TextColor[i].ColorPurple
+		CursorTextConfig[5] = TxtClr.TextColor[i].ColorCyan
+		CursorTextConfig[6] = TxtClr.TextColor[i].ColorWhite
+	}
+	for i := 0; i < len(CursorClr.CursorColor); i++ {
+		CursorColorConfig[0] = CursorClr.CursorColor[i].ColorRed
+		CursorColorConfig[1] = CursorClr.CursorColor[i].ColorGreen
+		CursorColorConfig[2] = CursorClr.CursorColor[i].ColorYellow
+		CursorColorConfig[3] = CursorClr.CursorColor[i].ColorBlue
+		CursorColorConfig[4] = CursorClr.CursorColor[i].ColorPurple
+		CursorColorConfig[5] = CursorClr.CursorColor[i].ColorCyan
+		CursorColorConfig[6] = CursorClr.CursorColor[i].ColorWhite
+	}
+}
+
+func FindColorConfig() (string, string) {
+	var Cursor string
+	var Text string
+	for i := 0; i <= 6; i++ {
+		if CursorColorConfig[i] == "true" {
+			fmt.Println(i)
+			Cursor = ColorMap[i]
+		}
+		if CursorTextConfig[i] == "true" {
+			fmt.Println(i)
+			Text = ColorMap[i]
+		}
+	}
+	return Cursor, Text
+}
+
 func Symbols() map[int]string {
 	symbols := make(map[int]string)
 	symbols[0] = "NUL"
@@ -258,17 +368,17 @@ func Symbols() map[int]string {
 	symbols[2] = "STX"
 	symbols[3] = "ETX"
 	symbols[4] = "EOT"
-	symbols[5] = "ENQ"
-	symbols[6] = "ACK"
-	symbols[7] = "BEL"
-	symbols[8] = "BS"
-	symbols[9] = "TAB"
-	symbols[10] = "LF"
-	symbols[11] = "VT"
-	symbols[12] = "FF"
-	symbols[13] = "CR"
-	symbols[14] = "SO"
-	symbols[15] = "SI"
+	symbols[5] = "EOT"
+	symbols[6] = "ENQ"
+	symbols[7] = "ACK"
+	symbols[8] = "BEL"
+	symbols[9] = "BS"
+	symbols[10] = "TAB"
+	symbols[11] = "LF"
+	symbols[12] = "VT"
+	symbols[13] = "FF"
+	symbols[14] = "CR"
+	symbols[15] = "SO"
 	symbols[16] = "DLE"
 	symbols[17] = "DC1"
 	symbols[18] = "DC2"
@@ -380,7 +490,120 @@ func Symbols() map[int]string {
 	symbols[124] = "|"
 	symbols[125] = "}"
 	symbols[126] = "~"
-	symbols[127] = "DEL"
+	symbols[127] = ""
 
 	return symbols
+}
+
+func processor(Arg1 string, Arg2 string) {
+	// colorRed
+	// colorGreen
+	// colorYellow
+	// colorBlue
+	// colorPurple
+	// colorCyan
+	// colorWhite
+	switch Arg1 {
+	case "Text-Red":
+		LoadColorConfig()
+		ChangeColor("true", "false", "false", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Green":
+		LoadColorConfig()
+		ChangeColor("false", "true", "false", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Yellow":
+		LoadColorConfig()
+		ChangeColor("false", "false", "true", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Blue":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "true", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Purple":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "true", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-Cyan":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "false", "true", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-White":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "false", "false", "true", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-NONE":
+		LoadColorConfig()
+		ChangeColor("false", "false", "false", "false", "false", "false", "false", CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	case "Text-SAME":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	default:
+		fmt.Println("Please Provide the Following Format when using note to change colorConfig.json:")
+		fmt.Println("note Test-COLOR Cursor-COLOR")
+		fmt.Println("Use note --help for help")
+		os.Exit(1)
+	}
+
+	switch Arg2 {
+	case "Cursor-Red":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "true", "false", "false", "false", "false", "false", "false")
+	case "Cursor-Green":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "true", "false", "false", "false", "false", "false")
+	case "Cursor-Yellow":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "true", "false", "false", "false", "false")
+	case "Cursor-Blue":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "true", "false", "false", "false")
+	case "Cursor-Purple":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "true", "false", "false")
+	case "Cursor-Cyan":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "false", "true", "false")
+	case "Cursor-White":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "false", "false", "true")
+	case "Cursor-NONE":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], "false", "false", "false", "false", "false", "false", "false")
+	case "Cursor-SAME":
+		LoadColorConfig()
+		ChangeColor(CursorTextConfig[0], CursorTextConfig[1], CursorTextConfig[2], CursorTextConfig[3], CursorTextConfig[4], CursorTextConfig[5], CursorTextConfig[6], CursorColorConfig[0], CursorColorConfig[1], CursorColorConfig[2], CursorColorConfig[3], CursorColorConfig[4], CursorColorConfig[5], CursorColorConfig[6])
+	default:
+		fmt.Println("Please Provide the Following Format when using note to change colorConfig.json:")
+		fmt.Println("note Test-COLOR Cursor-COLOR")
+		fmt.Println("Use note --help for help")
+		os.Exit(1)
+	}
+
+}
+
+func ChangeColor(valueA string, valueB string, valueC string, valueD string, valueE string, valueF string, valueG string, valueH string, valueI string, valueJ string, valueK string, valueL string, valueM string, valueN string) {
+	str := `{
+  "TextColor": [
+    {
+      "ColorRed":"` + valueA + `",
+      "ColorGreen":"` + valueB + `",
+      "ColorYellow":"` + valueC + `",
+      "ColorBlue":"` + valueD + `",
+      "ColorPurple":"` + valueE + `",
+      "ColorCyan" :"` + valueF + `",
+      "ColorWhite" :"` + valueG + `"
+    }
+  ],
+  "CursorColor": [
+    {
+      "ColorRed":"` + valueH + `",
+      "ColorGreen":"` + valueI + `",
+      "ColorYellow":"` + valueJ + `",
+      "ColorBlue":"` + valueK + `",
+      "ColorPurple":"` + valueL + `",
+      "ColorCyan" :"` + valueM + `",
+      "ColorWhite" :"` + valueN + `"
+    }
+  ]
+}`
+
+	d1 := []byte(str)
+	err := os.WriteFile("/note/colorConfig.json", d1, 0644)
+	if err != nil {
+		return
+	}
 }
