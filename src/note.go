@@ -16,6 +16,7 @@ var lstr string
 var rstr string
 var str string
 var ResetColor string
+var dir string
 
 // CursorColorGlobal Text Customization variables
 var CursorColorGlobal string
@@ -75,6 +76,9 @@ func init() {
 	ColorMap[5] = "\033[36m"
 	// colorWhite
 	ColorMap[6] = "\033[37m"
+	dirname, err := os.UserHomeDir()
+	check(err)
+	dir = dirname + "/note/colorConfig.json"
 	LoadColorConfig()
 	ResetColor = "\033[0m"
 	CursorColorGlobal, TextColorGlobal = FindColorConfig()
@@ -185,7 +189,7 @@ func LiveUpdate(still string, UpdateType string) int {
 		str = lstr + still + rstr
 		process()
 		CallClear()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
 	case "DelChar":
 		process()
 		str = lstr + trimFirstChar(rstr)
@@ -195,11 +199,11 @@ func LiveUpdate(still string, UpdateType string) int {
 		if position == -1 {
 			position++
 		}
-		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
 	case "Update":
 		process()
 		CallClear()
-		fmt.Fprintf(os.Stderr, "\r%s%s%s|%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
+		fmt.Fprintf(os.Stderr, "\r%s%s%s<|>%s%s", TextColorGlobal, lstr, CursorColorGlobal, TextColorGlobal, rstr)
 		return 0
 	}
 	return 0
@@ -316,7 +320,7 @@ func ArrowDown() int {
 
 func LoadColorConfig() {
 	// Open our jsonFile
-	jsonFile, err := os.Open("~/colorConfig.json")
+	jsonFile, err := os.Open(dir)
 	check(err)
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
@@ -608,7 +612,8 @@ func ChangeColor(valueA string, valueB string, valueC string, valueD string, val
 }`
 
 	d1 := []byte(str)
-	err := os.WriteFile("~/colorConfig.json", d1, 0644)
+
+	err := os.WriteFile(dir, d1, 0644)
 	if err != nil {
 		return
 	}
