@@ -1,0 +1,11 @@
+rocky "main";
+
+func main(int $y){
+	printf($y);
+
+	$y = $y + 2;
+
+	loop ($y){
+		printf($loop);
+	}
+}
