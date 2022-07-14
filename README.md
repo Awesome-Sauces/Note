@@ -1,4 +1,5 @@
 # Note
+
 Note is terminal text editor made with a tui library called [tview](https://github.com/rivo/tview/). Note is one of my favorite projects that I have ever done. It's by far the most effort I've put into one aswell, well anyways heres how to use it.
 
 ## Simple Commands
@@ -36,5 +37,8 @@ To install note there are various ways to do so, one way that is simple is downl
 sh build.sh
 ```
 If you have any recommendations or bugs about Note, please feel free to open an issue and report them.
+
+A text editor for the Linux Terminal! (Mainly compatible with Arch, because I made it on there)
+
 
 ![Note-logos_black-Logo](https://user-images.githubusercontent.com/78565561/150656857-c89e1528-9f4b-4df2-bd51-c43456c720c0.png)
