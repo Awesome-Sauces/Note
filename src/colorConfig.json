@@ -2,24 +2,23 @@
   "TextColor": [
     {
       "ColorRed":"false",
-      "ColorGreen": "false",
-      "ColorYellow": "false",
-      "ColorBlue": "false",
-      "ColorPurple": "false",
-      "ColorCyan" : "false",
-      "ColorWhite" : "true"
+      "ColorGreen":"false",
+      "ColorYellow":"false",
+      "ColorBlue":"false",
+      "ColorPurple":"false",
+      "ColorCyan" :"false",
+      "ColorWhite" :"true"
     }
   ],
-  "CursorColor": [
-
+  "BackGroundColor": [
     {
       "ColorRed":"false",
-      "ColorGreen": "false",
-      "ColorYellow": "false",
-      "ColorBlue": "false",
-      "ColorPurple": "true",
-      "ColorCyan" : "false",
-      "ColorWhite" : "false"
+      "ColorGreen":"false",
+      "ColorYellow":"false",
+      "ColorBlue":"false",
+      "ColorPurple":"false",
+      "ColorCyan" :"true",
+      "ColorWhite" :"false"
     }
   ]
 }
