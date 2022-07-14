@@ -1,1 +1,1 @@
-go build note.go navigation.go config.go commands.go
+go build note.go config.go commands.go structs.go

@@ -5,177 +5,99 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
+// Simple error checking
 func check(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
 
-var file string
-
+// Initializing tview.Application and
+// tview.Flex
 var app = tview.NewApplication()
+var flex = tview.NewFlex()
 
-var text = tview.NewTextView().
-	SetDynamicColors(true).
-	SetRegions(true).
-	SetChangedFunc(func() {
-		app.Draw()
-	})
+// NoteFile struct map
+// Stores all essential data
+var noteFiles = make(map[int]NoteFile)
 
-var position int = len(file)
+// File window open in
+// order of arguments
+var current_file = 1
 
 var ResetColor string
 var dir string
 
-// BackGroundColorGlobal Text Customization variables
+// Note version for printing to terminal
+var NOTE_VERSION string = "Note v1.2.2"
 
-func overWrite() {
-	d1 := []byte(file)
-	err := os.WriteFile(os.Args[2], d1, 0644)
-	check(err)
-}
 
 func main() {
 
+	// Checks args given to cli, if none are 
+	// given then give a help message
 	CheckArgs()
 
-	var dat, err = os.ReadFile(os.Args[2])
+	// Start up Message
+	// Sleep .5 seconds to give it
+	// a "loading" effect
+	fmt.Println("Running " + NOTE_VERSION +":")
+	fmt.Println("Using:\n- " + BackGroundColorGlobal + " Background\n- " + TextColorGlobal + " Text Color")
+	time.Sleep(500 * time.Millisecond)
 
-	check(err)
-
-	file = string(dat)
-
-	switch BackGroundColorGlobal {
-	case "[red]":
-		text.SetBackgroundColor(tcell.ColorRed)
-	case "[green]":
-		text.SetBackgroundColor(tcell.ColorGreen)
-	case "[yellow]":
-		text.SetBackgroundColor(tcell.ColorYellow)
-	case "[blue]":
-		text.SetBackgroundColor(tcell.ColorBlue)
-	case "[purple]":
-		text.SetBackgroundColor(tcell.ColorPurple)
-	case "[black]":
-		text.SetBackgroundColor(tcell.NewRGBColor(30, 30, 30))
-	case "[white]":
-		text.SetBackgroundColor(tcell.ColorWhite)
+	// Loop through noteFiles map and
+	// Initializing all the tview.TextView
+	for i, s := range noteFiles {
+		s.autoCreateTextView()
+		flex.AddItem(noteFiles[i].textView, 0, 1, false)
 	}
 
-	text.SetTitleColor(tcell.ColorBlack)
-	text.SetTitleAlign(tview.AlignCenter)
 
-	text.SetBorder(true)
-	text.SetTitle(TextColorGlobal + "[" + os.Args[2] + "]	 Click esc to quit!")
-	text.SetBorderColor(tcell.ColorBlack)
-	text.SetBorderAttributes(tcell.AttrDim)
-
-	position = len(file)
-
-	refresh(false)
-
+	// Basic User input setup
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 
-		if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModShift {
-			setPos(len(regexp.MustCompile(`\S+\s*$`).ReplaceAllString(file[:position], "")))
-			refresh(false)
+		// When user presses Right Arrow key + ctrl
+		// Switch over to the file on right
+		if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModCtrl {
+			if current_file + 1 > len(noteFiles){return event}
+			noteFiles[current_file].textView.SetText(noteFiles[current_file].getStringFormat())
+			current_file++
+			app.SetFocus(noteFiles[current_file].textView)
+			noteFiles[current_file].autoCreateTextView()
 			return event
-		} else if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModShift {
-			setPos(len(file) - len(regexp.MustCompile(`^\s*\S+\s*`).ReplaceAllString(file[position:], "")))
-			refresh(false)
+		// When user presses Left Arrow key + ctrl
+		// Switch over to the file on left
+		}else if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModCtrl {
+			if current_file - 1 < 1 {return event}
+			noteFiles[current_file].textView.SetText(noteFiles[current_file].getStringFormat())
+			current_file--
+			app.SetFocus(noteFiles[current_file].textView)
+			noteFiles[current_file].autoCreateTextView()
 			return event
-		} else if event.Key() == tcell.KeyCtrlW {
-			lastWord := regexp.MustCompile(`\S+\s*$`)
-			newText := lastWord.ReplaceAllString(file[:position], "") + file[position:]
-			position -= len(file) - len(newText)
-
-			if position < 0 {
-				position = 0
-			}
-
-			file = newText
-			refresh(false)
-			return event
-		} else if event.Key() == tcell.KeyLeft {
-			updatePos(false)
-			refresh(false)
-			return event
-		} else if event.Key() == tcell.KeyRight {
-			updatePos(true)
-			refresh(false)
-			return event
-		} else if event.Key() == tcell.KeyUp {
-			for i := position; i > 0; i-- {
-				if file[i-1:i] == "\n" || file[i-1:i] == "\r\n" || file[i-1:i] == "\r" {
-					setPos(i - 1)
-					refresh(false)
-					return event
-				}
-			}
-			return event
-		} else if event.Key() == tcell.KeyDown {
-			for i := position; i > 0; i++ {
-				if i+1 <= len(file) {
-					if file[i:i+1] == "\n" || file[i:i+1] == "\r\n" || file[i:i+1] == "\r" {
-						setPos(i + 1)
-						refresh(false)
-						return event
-					}
-				} else {
-					return event
-				}
-			}
-			return event
-		} else if event.Key() == tcell.KeyEnter {
-			file = file[0:position] + "\n" + file[position:]
-			updatePos(true)
-			refresh(false)
-			return event
-		} else if event.Key() == tcell.KeyDEL {
-
-			if len(file) > 0 && position-1 != -1 {
-				file = file[0:position-1] + file[position:]
-				updatePos(false)
-				refresh(false)
-
-				return event
-			}
-
-			return event
-
-		} else if event.Key() == tcell.KeyESC {
-			overWrite()
-			app.Stop()
-		} else {
-
-			if position == len(file) {
-				file += string(event.Rune())
-			} else {
-				file = file[0:position] + string(event.Rune()) + file[position:]
-			}
-
-			updatePos(true)
-			refresh(false)
-
-			return event
-
-		}
+		} 
 
 		return event
 	})
 
-	if err := app.SetRoot(text, true).EnableMouse(true).Run(); err != nil {
+
+	if err := app.SetRoot(flex, true).EnableMouse(true).Run(); err != nil {
 		panic(err)
 	}
 
 }
+
+/*
+
+	Ignore this huge spaghetti code used for .json
+
+*/
+
 
 func LoadColorConfig() {
 	// Open our jsonFile
@@ -228,11 +150,6 @@ func FindColorConfig() (string, string) {
 		}
 
 	}
-
-	fmt.Println("Running Note v1.0.0:")
-	fmt.Println("Using:\n- " + BackGround + " Background\n- " + Text + " Text Color")
-
-	time.Sleep(500 * time.Millisecond)
 
 	return BackGround, Text
 }

@@ -36,7 +36,8 @@ type BackGroundColor struct {
 	ColorWhite  string `json:"ColorWhite"`
 }
 
-//
+// Background and TextColor 
+// related variables
 var BackGroundColorGlobal string
 var TextColorGlobal string
 var BackGroundColorConfig map[int]string
@@ -66,7 +67,9 @@ func init() {
 
 	check(err)
 
+	// Loading color value config
 	LoadColorConfig()
 
+	// Asigning values
 	BackGroundColorGlobal, TextColorGlobal = FindColorConfig()
 }
