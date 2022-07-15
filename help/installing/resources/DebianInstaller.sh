@@ -38,3 +38,4 @@ rm build.sh
 sudo mkdir ~/note
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/colorConfig.json
 sudo mv -i colorConfig.json ~/note
+rm colorConfig.json
