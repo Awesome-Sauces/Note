@@ -62,6 +62,8 @@ func main() {
 	// Basic User input setup
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 
+		if !noteFiles[current_file].textView.HasFocus(){app.SetFocus(noteFiles[current_file].textView)}
+		
 		// When user presses Right Arrow key + ctrl
 		// Switch over to the file on right
 		if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModCtrl {
