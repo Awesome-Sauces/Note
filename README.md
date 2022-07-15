@@ -32,7 +32,7 @@ This command sets the text color to white
 note -txt white
 ```
 ## Installing
-To install note there are various ways to do so, one way that is simple is downloading the proper installer script **(Installer scripts are located in installers directory and end with the .sh extension)** for your operating system or linux distrobution. I still have to expand the installer scripts a bit and test on more distro's. Compiling from source is another one, there is even a bash script to help you do so! Located in the src directory all you have to do is run this command to build the source **(Assuming you have golang already installed)**
+To install note there are various ways to do so, one way that is simple is downloading the proper installer script **(Installer scripts are located in installers directory and end with the .sh extension, for a deep guide on installing [click here](https://github.com/Awesome-Sauces/Note/tree/main/installers#readme))** for your operating system or linux distrobution. I still have to expand the installer scripts a bit and test on more distro's. Compiling from source is another one, there is even a bash script to help you do so! Located in the src directory all you have to do is run this command to build the source **(Assuming you have golang already installed)**
 ```
 sh build.sh
 ```
