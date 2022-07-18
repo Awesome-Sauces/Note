@@ -10,21 +10,14 @@ then
 fi
 fi
 
-touch note.go
-touch structs.go
-touch config.go
-touch commands.go
-touch build.sh
-touch go.sum
-touch go.mod
 # Grabs Newest version of Note
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go > note.go
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/structs.go > structs.go
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/config.go > config.go
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/commands.go > commands.go
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod > go.mod
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.sum > go.sum
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/build.sh > build.sh
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go --output note.go
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/structs.go --output structs.go
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/config.go --output config.go
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/commands.go --output commands.go
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod --output go.mod
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.sum --output go.sum
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/build.sh --output build.sh
 sh build.sh
 sudo mv -i note /usr/bin
 rm note.go
