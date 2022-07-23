@@ -1,0 +1,23 @@
+string $y = "#303030";
+
+string $numColor = "#b2b2b2";
+string $shadow = "#4e4e4e";
+string $style = "b";
+
+int $loc = 5;
+
+Background($y);
+
+LineColors($numColor, $style, $shadow);
+
+printf("Background set to " $y);
+
+
+list $keywords = ["for", "while", "def", "class", "print", "fmt", "Println", "'"];
+list $colors = ["#ff87ff", "#ff87ff", "#ff87ff", "#ff87ff", "#5f87d7", "#5f87d7", "#ff87ff", "#5f87d7"];
+
+loop($keywords){
+	printf($loop)
+}
+
+Escape()

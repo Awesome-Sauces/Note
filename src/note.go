@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -23,6 +22,8 @@ func check(e error) {
 var app = tview.NewApplication()
 var flex = tview.NewFlex()
 
+var pColorTheme *ColorTheme = &ColorTheme{name: "", keywords: make(map[string]cKeyWord)}
+
 // NoteFile struct map
 // Stores all essential data
 var noteFiles = make(map[int]NoteFile)
@@ -34,12 +35,22 @@ var current_file = 1
 var ResetColor string
 var dir string
 
+
 // Note version for printing to terminal
-var NOTE_VERSION string = "Note v1.2.2"
+var NOTE_VERSION string = "Note v1.3.2"
+var NOTE_HELP string = NOTE_VERSION + "\n\n" +
+		"Usage: note [-arg]\n" +
+		"    note [--help]\n" +
+		"    note [filename]\n" +
+		"    note [-txt] [color]\n" +
+		"    note [-bg] [color]\n" +
+		"Experimental:\n" +
+		"    note -script [SCRIPT_NAME]\n" +
+		"Color list:\n" +
+		"    [white]\n    [red]\n    [black]\n    [blue]\n    [green]\n    [purple]\n    [yellow]\n" 
 
 
 func main() {
-
 	// Checks args given to cli, if none are 
 	// given then give a help message
 	CheckArgs()
