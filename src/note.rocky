@@ -13,8 +13,8 @@ LineColors($numColor, $style, $shadow);
 printf("Background set to " $y);
 
 
-list $keywords = ["for", "while", "def", "class", "print", "fmt", "Println", "'"];
-list $colors = ["#ff87ff", "#ff87ff", "#ff87ff", "#ff87ff", "#5f87d7", "#5f87d7", "#ff87ff", "#5f87d7"];
+list $keywords = ["for", "while", "def", "class", "print", "fmt", "Println", "'", "Math", "var"];
+list $colors = ["#ff87ff", "#ff87ff", "#ff87ff", "#ff87ff", "#5f87d7", "#5f87d7", "#ff87ff", "#5f87d7", "#5f87d7", "#5f87d7"];
 
 loop($keywords){
 	NewKeyword(".py", $keywords[$loop], $colors[$loop])	

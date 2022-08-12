@@ -45,7 +45,7 @@ func (txt *TextEditor) showCursor(rows map[int]string) string {
 
 func (txt  *TextEditor) getFormat() string {
 	final := ""
-
+	
 	for LOOP := 1; LOOP <= len(txt.rows); LOOP++{
 		index := LOOP
 		element := tview.Escape(txt.rows[LOOP])
@@ -87,7 +87,9 @@ func (txt *TextEditor) getLocation() position {
 func (txt *TextEditor) finalize() string {
 	final := ""
 
+	return string(len(txt.rows))
 	for LOOP := 1; LOOP <= len(txt.rows); LOOP++{
+	//	fmt.Println(LOOP)
 		index := LOOP
 		element := txt.rows[LOOP]
 
@@ -97,10 +99,11 @@ func (txt *TextEditor) finalize() string {
 		NumberColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
 		
 		if index == txt.cursor.y{
+		
 			//app.Stop()
 			//fmt.Println(Math.max(txt.cursor.x-1, 0))
 			//fmt.Println(Math.min(txt.cursor.x, len(element)))
-			element = tview.Escape(element[0:Math.max(txt.cursor.x, 0)]) + "[:#00aeff] " +"[:-]" + tview.Escape(element[Math.max(txt.cursor.x, 0):])
+			element = tview.Escape(element[0:Math.min(Math.max(txt.cursor.x, 0), len(txt.rows[txt.cursor.y]))]) + "[:#00aeff] " +"[:-]" + tview.Escape(element[Math.min(Math.max(txt.cursor.x, 0), len(txt.rows[txt.cursor.y])):])
 			//element = element[0:Math.max(txt.cursor.x-1, 0)] + "[:#00aeff]" + element[Math.max(txt.cursor.x-1, 0):Math.min(txt.cursor.x, 0)] + "[:-]" + element[Math.max(txt.cursor.x, 0):]
 			//element = tview.Escape(element[0:Math.max(txt.cursor.x-1, 0)]) + "[:#00aeff]" + tview.Escape(element[Math.max(txt.cursor.x-1, 0):Math.min(txt.cursor.x, len(element))]) + "[:-]" + tview.Escape(element[Math.max(txt.cursor.x, 0):])
 		}
@@ -139,23 +142,27 @@ func (txt *TextEditor) setLocation(pos position, spacing bool) {
 
 
 func (txt *TextEditor) newLine(){
+	//app.Stop()
+	//fmt.Println(txt.rows[txt.cursor.y] + "--------")
+	txt.rows[txt.cursor.y] = txt.rows[txt.cursor.y][0:Math.max(txt.cursor.x, 0)] + "\n" + txt.rows[txt.cursor.y][Math.max(txt.cursor.x, 0):]
 	temp := txt.getText()
+	list := strings.Split(temp, "\n")
 	txt.rows = make(map[int]string)
+
 
 //	fmt.Println(strings.Split(temp, "\n"))
 
-	list := strings.Split(temp, "\n")
+	//fmt.Println(temp + "-------------")
 
-	for LOOP := 1; LOOP <= len(list); LOOP++{
-		index := LOOP
-		element := list[index-1]
-
-		if index == txt.cursor.y {
-			txt.rows[len(txt.rows)+1] = element[0:Math.max(Math.min(txt.cursor.x-len(element), len(element)), 0)]
-			txt.rows[len(txt.rows)+1] = element[Math.max(txt.cursor.x-len(element), 0):]
-			//txt.moveRight()
-		}else{txt.rows[len(txt.rows)+1] = element}
+	for index, element := range list{
+		if index+1 != len(list){
+			txt.rows[index+1] = element
+	//		fmt.Println(index+1, ":" + element)
+		}
 	}
+
+
+	txt.moveDown()
 
 }
 
