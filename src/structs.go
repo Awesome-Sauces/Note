@@ -2,13 +2,13 @@ package main
 
 import (
 	"os"
-	"regexp"
+//	"regexp"
 	"strconv"
 	"strings"
 //	"time"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	
+_	"fmt"
 )
 
 // Cursor color
@@ -18,10 +18,9 @@ var color string = "[:#00aeff]"
 // TextView and other management
 type NoteFile struct {
 	textView *tview.TextView
-	position int
-	text     string
 	filename string
 	order    int
+	editor TextEditor
 }
 
 type ColorTheme struct {
@@ -66,7 +65,7 @@ func (ct *ColorTheme) changeName(name string) {
 // Save file, if it has UNOWN_FILE flag
 // then create the file
 func (v *NoteFile) saveFile() {
-	d1 := []byte(v.text)
+	d1 := []byte(v.editor.getText())
 
 	if strings.Contains(v.filename, "(**|**)") {
 		myfile, e := os.Create(strings.ReplaceAll(v.filename, "(**|**)", ""))
@@ -80,33 +79,18 @@ func (v *NoteFile) saveFile() {
 	check(err)
 }
 
-// Update position by 1 or by -1
-func (v *NoteFile) updatePos(e bool) {
-	if e {
-		v.position++
-	} else if v.position > 0 {
-		v.position--
-	}
-}
-
 // Draw the cursor to the screen
 func (v *NoteFile) drawCursor() {
-
+/*
 	var vFile string
 
 	var zFile string
 
-	if v.position > len(v.text) {
-		v.position = len(v.text)
-	}
+//	if v.position > len(v.text) {
+	//	v.position = len(v.text)
+//	}
 
 	lineColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
-
-	vFile = tview.Escape(v.text) + color + " [:-]"
-
-	if v.position >= 0 {
-		vFile = tview.Escape(v.text[0:Math.max(v.position-1, 0)]) + color + tview.Escape(v.text[Math.max(v.position-1, 0):v.position]) + "[:-]" + tview.Escape(v.text[v.position:])
-	}
 
 	for _, et := range pColorTheme.keywords{
 		vFile = strings.ReplaceAll(vFile, et.name, "[" + et.color + "]" + et.name + "[#ffffff]")
@@ -125,10 +109,24 @@ func (v *NoteFile) drawCursor() {
 		
 		zFile += lineColor + space + strconv.Itoa(index+1) + " [-:-:-] " + element + "\n"
 	}
+*/
+
+//	vFile = tview.Escape(v.text) + color + " [:-]"
+
+//	if v.position >= 0 {
+//		vFile = tview.Escape(v.text[0:Math.max(v.position-1, 0)]) + color + tview.Escape(v.text[Math.max(v.position-1, 0):v.position]) + "[:-]" + tview.Escape(v.text[v.position:])
+//	}
+
 
 	v.textView.Clear()
 
-	v.textView.Write([]byte(zFile))
+	v.textView.SetText(v.editor.finalize())
+
+	//v.textView.Write([]byte(v.editor.finalize()))
+}
+
+func (v NoteFile) getFormat() string{
+	return v.editor.getFormat()
 }
 
 // Handle arrow key movement, input
@@ -136,101 +134,64 @@ func (v *NoteFile) drawCursor() {
 func (v *NoteFile) NewInputManager() {
 	v.textView.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// If the app isn't focus'd on this view then ignore input
-		if !v.textView.HasFocus() {
-			return event
-		}
-		// Skip one word left on left arrow + shift
-		if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModShift {
-			v.setPos(len(regexp.MustCompile(`\S+\s*$`).ReplaceAllString(v.text[:v.position], "")))
+		if !v.textView.HasFocus() {return event}
+		
+		if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModCtrl {
+			// Skip one word left on left arrow + shift
+			v.editor.moveWordLeft()
 			v.drawCursor()
 			return event
+		} else if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModCtrl {
 			// Skip one word right on right arrow + shift
-		} else if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModShift {
-			v.setPos(len(v.text) - len(regexp.MustCompile(`^\s*\S+\s*`).ReplaceAllString(v.text[v.position:], "")))
+			v.editor.moveWordRight()
 			v.drawCursor()
 			return event
-			// Delete one word right
 		} else if event.Key() == tcell.KeyCtrlW {
-			lastWord := regexp.MustCompile(`\S+\s*$`)
-			newText := lastWord.ReplaceAllString(v.text[:v.position], "") + v.text[v.position:]
-			v.position -= len(v.text) - len(newText)
-
-			if v.position < 0 {
-				v.position = 0
-			}
-
-			v.text = newText
+			// Delete one word right
+			v.editor.deleteWord()
 			v.drawCursor()
 			return event
-			// Left Arrow key
 		} else if event.Key() == tcell.KeyLeft {
-			v.updatePos(false)
+			// Left Arrow key
+			v.editor.moveLeft()
 			v.drawCursor()
 			return event
-			// Right Arrow key
 		} else if event.Key() == tcell.KeyRight {
-			v.updatePos(true)
+			// Right Arrow key
+			v.editor.moveRight()
 			v.drawCursor()
 			return event
-			// Up Arrow key
 		} else if event.Key() == tcell.KeyUp {
-			for i := v.position; i > 0; i-- {
-				if v.text[i-1:i] == "\n" || v.text[i-1:i] == "\r\n" || v.text[i-1:i] == "\r" {
-					v.setPos(i - 1)
-					v.drawCursor()
-					return event
-				}
-			}
-			return event
-			// Down Arrow key
-		} else if event.Key() == tcell.KeyDown {
-			for i := v.position; i >= 0; i++ {
-				if i+1 <= len(v.text) {
-					if v.text[i:i+1] == "\n" || v.text[i:i+1] == "\r\n" || v.text[i:i+1] == "\r" {
-						v.setPos(i + 1)
-						v.drawCursor()
-						return event
-					}
-				} else {
-					return event
-				}
-			}
-			return event
-			// "Newline"/Enter key
-		} else if event.Key() == tcell.KeyEnter {
-			v.text = v.text[0:v.position] + "\n" + v.text[v.position:]
-			v.updatePos(true)
+			// Up Arrow key
+			v.editor.moveUp()
 			v.drawCursor()
 			return event
-			// Deleting characters at cursor position
-		} else if event.Key() == tcell.KeyDEL {
-
-			if len(v.text) > 0 && v.position-1 != -1 {
-				v.text = v.text[0:v.position-1] + v.text[v.position:]
-				v.updatePos(false)
-				v.drawCursor()
-
-				return event
-			}
-
+		} else if event.Key() == tcell.KeyDown {
+			// Down Arrow key
+			v.editor.moveDown()
+			v.drawCursor()
 			return event
+		} else if event.Key() == tcell.KeyEnter {
+			// "Newline"/Enter key
+			v.editor.newLine()
+			v.drawCursor()
+			return event
+		} else if event.Key() == tcell.KeyDEL {
+			// Deleting characters at cursor position
+			v.editor.deleteChar()
+			v.drawCursor()
+			return event
+		} else if event.Key() == tcell.KeyESC {
 			// On escape key save and exit
 			// To-do:
 			// Make it only close the file that ESC was pressed on
-		} else if event.Key() == tcell.KeyESC {
 			v.saveFile()
 			app.Stop()
+		} else {
 			// Handling normal
 			// Characters
-		} else {
+			v.editor.addChar(string(event.Rune()))
 
-			if v.position == len(v.text) {
-				v.text += string(event.Rune())
-			} else {
-				v.text = v.text[0:v.position] + string(event.Rune()) + v.text[v.position:]
-			}
-
-			v.updatePos(true)
 			v.drawCursor()
 
 			return event
@@ -246,7 +207,10 @@ func (v *NoteFile) NewInputManager() {
 
 			v.textView.ScrollTo(event.Position())
 
-			v.textView.SetText(strconv.Itoa(row) + ":" + strconv.Itoa(column))
+			v.editor.setLocation(position{x: column, y: row}, true)
+
+			v.drawCursor()
+			
 		}
 
 		return action, event
@@ -271,58 +235,17 @@ func (v *NoteFile) startTheme() {
 	v.textView.SetBorderColor(tcell.ColorBlack)
 	v.textView.SetBorderAttributes(tcell.AttrDim)
 
-	v.position = 0
 
-	v.textView.SetText(v.getStringFormat())
-}
-
-// Get the file with color format excluding cursor
-func (v NoteFile) getStringFormat() string {
-
-	tempText := tview.Escape(v.text)
-
-	stringReturn := ""
-
-	lineColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
-
-	for index, element := range strings.Split(tempText, "\n") {
-		space := ""
-
-		mDigits := iterativeDigitsCount(len(strings.Split(tempText, "\n")))
-		sDigits := iterativeDigitsCount(index+1)
-
-		for i := 1; i < (mDigits-sDigits)+1; i++ {
-		    space += " "
-		}
-
-		element = tview.Escape(element)
-
-		for _, et := range pColorTheme.keywords{
-			strings.ReplaceAll(element, et.name, et.color + tview.Escape(et.name))
-		}
-		
-		stringReturn += lineColor + space + strconv.Itoa(index+1) + " [-:-:-] " + element + "\n"
-	}
-
-	return stringReturn
-}
-
-// Setting postion
-// to specific location
-func (v *NoteFile) setPos(e int) {
-	if e > len(v.text) {
-		return
-	}
-	v.position = e
+	v.textView.SetText(v.editor.getFormat())
 }
 
 func iterativeDigitsCount(number int) int {
-    count := 0
-    for number != 0 {
-        number /= 10
-        count += 1
-    }
-    return count
 
+	str := strconv.Itoa(number)
+//	str = strings.ReplaceAll(str, ".", "")
+
+//	fmt.Println(len(str))
+
+    return len(str)
 }
 

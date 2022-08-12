@@ -1,2 +1,1 @@
-sh build.sh
-./note -script
+clear && sh build.sh && ./note -test

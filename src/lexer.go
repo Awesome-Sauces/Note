@@ -114,7 +114,7 @@ func (lex *Lexer) iter(){
 				lex.variable = false
 				lex.newToken("variable")
 			}else {lex.variable = true}
-	}else if lex.char == "." || Math.isDigit(lex.char) && !lex.quotes {
+	}else if lex.char == "." && !lex.quotes || Math.isDigit(lex.char) && !lex.quotes {
 		if !Math.isDigit(nextChar(lex.text, lex.position)) && nextChar(lex.text, lex.position) != "."{
 			lex.tokens[len(lex.tokens)] = Token{token: "number", value:rWhite(rWhite(lex.word))}
 			lex.newToken("number")

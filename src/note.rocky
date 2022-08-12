@@ -17,7 +17,5 @@ list $keywords = ["for", "while", "def", "class", "print", "fmt", "Println", "'"
 list $colors = ["#ff87ff", "#ff87ff", "#ff87ff", "#ff87ff", "#5f87d7", "#5f87d7", "#ff87ff", "#5f87d7"];
 
 loop($keywords){
-	printf($loop)
+	NewKeyword(".py", $keywords[$loop], $colors[$loop])	
 }
-
-Escape()

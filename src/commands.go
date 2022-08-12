@@ -4,46 +4,12 @@ import (
 	"fmt"
 	"os"
 	"github.com/rivo/tview"
-	"strings"
 )
 
 var (
 	stdinfd  = int(os.Stdin.Fd())
 	stdoutfd = int(os.Stdout.Fd())
 )
-
-type TextEditor struct{
-	text string
-	rows map[int]string
-	rowSpacing int
-}
-
-type position struct{
-	x int
-	y int
-}
-
-func (txt *TextEditor) getRow(pos position) string {
-	return txt.rows[Math.min(pos.y, len(txt.rows))]
-}
-
-func (txt *TextEditor) getChar(pos position) string {
-	pos.x += txt.rowSpacing
-	return txt.rows[Math.min(pos.y, len(txt.rows))][Math.max(pos.x-1, 0):Math.min(pos.x, len(txt.rows[Math.min(pos.y, len(txt.rows))]))]
-}
-
-func (txt *TextEditor) orderText(text string){
-	txt.text = text
-	txt.rows = make(map[int]string)
-	for _, element := range strings.Split(text, "\n") {txt.rows[len(txt.rows)+1] = element}
-}
-
-func (txt *TextEditor) initText(text string){
-	txt.text = text
-	yMap := make(map[int]string)
-	for _, element := range strings.Split(text, "\n") {yMap[len(yMap)+1] = element}
-	txt.rows = yMap
-}
 
 func CheckArgs() {
 
@@ -57,14 +23,50 @@ func CheckArgs() {
 		backGroundChange(os.Args[2])
 		os.Exit(3)
 	} else if len(os.Args) > 1 && os.Args[1] == "-test"{
-		
+
+/*		
 		editor := TextEditor{rowSpacing: 3}
 
-		editor.initText("Hello world this is my text" +
-						"\n Very amazing i see")
+		var det, er = os.ReadFile(os.Args[2])
+		check(er)
+
+		//fmt.Println(string(det))
+		editor.loadText(string(det)"print('Hello World')\ndef main:\nprint('Main')")
+		//editor.moveRight()
+
+
+		var dat, err = os.ReadFile("note.rocky")
+
+		check(err)
+
+		var txt string = string(dat)
+
+	//	for i, s := range os.Args {if i > 1{txt+=s + " "}}
+
+		lex := Lexer{text: txt,
+					 position: 0,
+					 }
+		lex.lex()
+
+		lex.eval()
 		
-		fmt.Println("VALUE: " + editor.getChar(position{y: 2, x: 5}))
-		
+
+	
+
+		//editor.deleteChar()
+		//editor.deleteChar()
+
+		fmt.Println(editor.finalize())
+		editor.newLine()
+		fmt.Println(editor.finalize())
+*/	
+		mapy := make(map[int]string)
+
+		mapy[1] = "Hello"
+		mapy[2] = "World"
+		fmt.Println(len(mapy))
+		delete(mapy, 2)
+		fmt.Println(len(mapy))
 
 		os.Exit(1)
 	} else if len(os.Args) > 1 && os.Args[1] == "-script" {
@@ -110,35 +112,33 @@ func CheckArgs() {
 			if i != 0{
 
 				var dat, err = os.ReadFile(os.Args[i])
+				
 
 				// If file doesn't exist
 				// create a temporary file
 				// Handled later
 				if err != nil{
 					noteFiles[i] = NoteFile{textView:  tview.NewTextView().
-							SetScrollable(true).
 							SetDynamicColors(true).
 							SetRegions(true).
 							SetChangedFunc(func() {
 								app.Draw()
 							}), 
-							position: 0,
-							text: "",
 							filename: s + "(**|**)",
 							order: i}
 				}
 
 				// Creating instance of struct 
 				// if file exists
+				edit := TextEditor{}
+				edit.loadText(string(dat))
 				noteFiles[i] = NoteFile{textView:  tview.NewTextView().
-									SetScrollable(true).
 									SetDynamicColors(true).
 									SetRegions(true).
 									SetChangedFunc(func() {
 										app.Draw()
 									}), 
-									position: 0,
-									text: string(dat),
+									editor: edit,
 									filename: s,
 									order: i}
 			}

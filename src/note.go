@@ -79,7 +79,7 @@ func main() {
 		// Switch over to the file on right
 		if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModCtrl {
 			if current_file + 1 > len(noteFiles){return event}
-			noteFiles[current_file].textView.SetText(noteFiles[current_file].getStringFormat())
+			noteFiles[current_file].textView.SetText(noteFiles[current_file].getFormat())
 			current_file++
 			app.SetFocus(noteFiles[current_file].textView)
 			noteFiles[current_file].autoCreateTextView()
@@ -88,7 +88,7 @@ func main() {
 		// Switch over to the file on left
 		}else if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModCtrl {
 			if current_file - 1 < 1 {return event}
-			noteFiles[current_file].textView.SetText(noteFiles[current_file].getStringFormat())
+			noteFiles[current_file].textView.SetText(noteFiles[current_file].getFormat())
 			current_file--
 			app.SetFocus(noteFiles[current_file].textView)
 			noteFiles[current_file].autoCreateTextView()
