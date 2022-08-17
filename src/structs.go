@@ -2,13 +2,15 @@ package main
 
 import (
 	"os"
-//	"regexp"
+	//	"regexp"
 	"strconv"
 	"strings"
-//	"time"
+
+	//	"time"
+	_ "fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-_	"fmt"
 )
 
 // Cursor color
@@ -20,7 +22,7 @@ type NoteFile struct {
 	textView *tview.TextView
 	filename string
 	order    int
-	editor TextEditor
+	editor   TextEditor
 }
 
 type ColorTheme struct {
@@ -81,42 +83,41 @@ func (v *NoteFile) saveFile() {
 
 // Draw the cursor to the screen
 func (v *NoteFile) drawCursor() {
-/*
-	var vFile string
+	/*
+	   	var vFile string
 
-	var zFile string
+	   	var zFile string
 
-//	if v.position > len(v.text) {
-	//	v.position = len(v.text)
-//	}
+	   //	if v.position > len(v.text) {
+	   	//	v.position = len(v.text)
+	   //	}
 
-	lineColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
+	   	lineColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
 
-	for _, et := range pColorTheme.keywords{
-		vFile = strings.ReplaceAll(vFile, et.name, "[" + et.color + "]" + et.name + "[#ffffff]")
-	}
+	   	for _, et := range pColorTheme.keywords{
+	   		vFile = strings.ReplaceAll(vFile, et.name, "[" + et.color + "]" + et.name + "[#ffffff]")
+	   	}
 
 
-	for index, element := range strings.Split(vFile, "\n") {
-		space := ""
+	   	for index, element := range strings.Split(vFile, "\n") {
+	   		space := ""
 
-		mDigits := iterativeDigitsCount(len(strings.Split(vFile, "\n")))
-		sDigits := iterativeDigitsCount(index+1)
+	   		mDigits := iterativeDigitsCount(len(strings.Split(vFile, "\n")))
+	   		sDigits := iterativeDigitsCount(index+1)
 
-		for i := 1; i < (mDigits-sDigits)+1; i++ {
-		    space += " "
-		}
-		
-		zFile += lineColor + space + strconv.Itoa(index+1) + " [-:-:-] " + element + "\n"
-	}
-*/
+	   		for i := 1; i < (mDigits-sDigits)+1; i++ {
+	   		    space += " "
+	   		}
 
-//	vFile = tview.Escape(v.text) + color + " [:-]"
+	   		zFile += lineColor + space + strconv.Itoa(index+1) + " [-:-:-] " + element + "\n"
+	   	}
+	*/
 
-//	if v.position >= 0 {
-//		vFile = tview.Escape(v.text[0:Math.max(v.position-1, 0)]) + color + tview.Escape(v.text[Math.max(v.position-1, 0):v.position]) + "[:-]" + tview.Escape(v.text[v.position:])
-//	}
+	//	vFile = tview.Escape(v.text) + color + " [:-]"
 
+	//	if v.position >= 0 {
+	//		vFile = tview.Escape(v.text[0:Math.max(v.position-1, 0)]) + color + tview.Escape(v.text[Math.max(v.position-1, 0):v.position]) + "[:-]" + tview.Escape(v.text[v.position:])
+	//	}
 
 	v.textView.Clear()
 
@@ -125,7 +126,7 @@ func (v *NoteFile) drawCursor() {
 	//v.textView.Write([]byte(v.editor.finalize()))
 }
 
-func (v NoteFile) getFormat() string{
+func (v NoteFile) getFormat() string {
 	return v.editor.getFormat()
 }
 
@@ -134,8 +135,10 @@ func (v NoteFile) getFormat() string{
 func (v *NoteFile) NewInputManager() {
 	v.textView.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// If the app isn't focus'd on this view then ignore input
-		if !v.textView.HasFocus() {return event}
-		
+		if !v.textView.HasFocus() {
+			return event
+		}
+
 		if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModCtrl {
 			// Skip one word left on left arrow + shift
 			v.editor.moveWordLeft()
@@ -210,7 +213,7 @@ func (v *NoteFile) NewInputManager() {
 			v.editor.setLocation(position{x: column, y: row}, true)
 
 			v.drawCursor()
-			
+
 		}
 
 		return action, event
@@ -231,10 +234,9 @@ func (v *NoteFile) startTheme() {
 	v.textView.SetTitleAlign(tview.AlignCenter)
 
 	v.textView.SetBorder(true)
-	v.textView.SetTitle(TextColorGlobal + "[" + v.filename + "]	 Click esc to quit!")
+	v.textView.SetTitle("[" + v.filename + "]	 Click esc to quit!")
 	v.textView.SetBorderColor(tcell.ColorBlack)
 	v.textView.SetBorderAttributes(tcell.AttrDim)
-
 
 	v.textView.SetText(v.editor.getFormat())
 }
@@ -242,10 +244,9 @@ func (v *NoteFile) startTheme() {
 func iterativeDigitsCount(number int) int {
 
 	str := strconv.Itoa(number)
-//	str = strings.ReplaceAll(str, ".", "")
+	//	str = strings.ReplaceAll(str, ".", "")
 
-//	fmt.Println(len(str))
+	//	fmt.Println(len(str))
 
-    return len(str)
+	return len(str)
 }
-

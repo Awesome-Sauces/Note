@@ -1,20 +1,22 @@
 package main
 
-import(
+import (
+	"fmt"
+	_ "fmt"
 	"regexp"
-	"strings"
-	"github.com/rivo/tview"
 	"strconv"
-_	"fmt"
+	"strings"
+
+	"github.com/rivo/tview"
 )
 
-type TextEditor struct{
-	rows map[int]string
+type TextEditor struct {
+	rows       map[int]string
 	rowSpacing int
-	cursor position
+	cursor     position
 }
 
-type position struct{
+type position struct {
 	x int
 	y int
 }
@@ -31,22 +33,22 @@ func (txt *TextEditor) showCursor(rows map[int]string) string {
 	text := ""
 	//vFile = tview.Escape(v.text[0:Math.max(v.position-1, 0)]) + color + tview.Escape(v.text[Math.max(v.position-1, 0):v.position]) + "[:-]" + tview.Escape(v.text[v.position:])
 	for iter, i := range rows {
-		if iter == txt.cursor.y{
+		if iter == txt.cursor.y {
 
 			i = i[0:Math.max(txt.cursor.x-1, 0)] + "[:#00aeff]" + i[Math.max(txt.cursor.x-1, 0):Math.max(txt.cursor.x, 0)] + "[:-]" + i[Math.max(txt.cursor.x, 0):]
-					
-	//		i[Math.max(txt.cursor.x-1, 0):Math.min(txt.cursor.x, len(txt.rows[Math.min(txt.cursor.y, len(txt.rows))]))]
+
+			//		i[Math.max(txt.cursor.x-1, 0):Math.min(txt.cursor.x, len(txt.rows[Math.min(txt.cursor.y, len(txt.rows))]))]
 		}
 		text += i + "\n"
 	}
-	
+
 	return text
 }
 
-func (txt  *TextEditor) getFormat() string {
+func (txt *TextEditor) getFormat() string {
 	final := ""
-	
-	for LOOP := 1; LOOP <= len(txt.rows); LOOP++{
+
+	for LOOP := 1; LOOP <= len(txt.rows); LOOP++ {
 		index := LOOP
 		element := tview.Escape(txt.rows[LOOP])
 
@@ -55,41 +57,40 @@ func (txt  *TextEditor) getFormat() string {
 		sDigits := iterativeDigitsCount(index)
 		NumberColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
 
-		for _, et := range pColorTheme.keywords{
-			
-			element = strings.ReplaceAll(element, et.name, "[" + et.color + "]" + et.name + "[#ffffff]")
+		for _, et := range pColorTheme.keywords {
 
+			element = strings.ReplaceAll(element, et.name, "["+et.color+"]"+et.name+"[#ffffff]")
 
-//			return i
+			//			return i
 			//ping <- true
 		}
-		
+
 		//lineColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
 
-		for i := 1; i < (mDigits-sDigits)+1; i++{space += " "}
+		for i := 1; i < (mDigits-sDigits)+1; i++ {
+			space += " "
+		}
 
 		lineNumbers := space + strconv.Itoa(index) + " [-:-:-]"
 
 		txt.rowSpacing = len(lineNumbers) - (7 + len(strconv.Itoa(index)))
 
 		final += NumberColor + lineNumbers + element + "\n"
-		
+
 	}
 
 	return final
 }
 
-
 func (txt *TextEditor) getLocation() position {
-	return position{x: txt.cursor.x+txt.rowSpacing,y: txt.cursor.y}
+	return position{x: txt.cursor.x + txt.rowSpacing, y: txt.cursor.y}
 }
 
 func (txt *TextEditor) finalize() string {
 	final := ""
 
-	return string(len(txt.rows))
-	for LOOP := 1; LOOP <= len(txt.rows); LOOP++{
-	//	fmt.Println(LOOP)
+	for LOOP := 1; LOOP <= len(txt.rows); LOOP++ {
+		//	fmt.Println(LOOP)
 		index := LOOP
 		element := txt.rows[LOOP]
 
@@ -97,51 +98,51 @@ func (txt *TextEditor) finalize() string {
 		mDigits := iterativeDigitsCount(len(txt.rows))
 		sDigits := iterativeDigitsCount(index)
 		NumberColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
-		
-		if index == txt.cursor.y{
-		
+
+		if index == txt.cursor.y {
+
 			//app.Stop()
 			//fmt.Println(Math.max(txt.cursor.x-1, 0))
 			//fmt.Println(Math.min(txt.cursor.x, len(element)))
-			element = tview.Escape(element[0:Math.min(Math.max(txt.cursor.x, 0), len(txt.rows[txt.cursor.y]))]) + "[:#00aeff] " +"[:-]" + tview.Escape(element[Math.min(Math.max(txt.cursor.x, 0), len(txt.rows[txt.cursor.y])):])
+			element = tview.Escape(element[0:Math.min(Math.max(txt.cursor.x, 0), len(txt.rows[txt.cursor.y]))]) + "[:#00aeff] " + "[:-]" + tview.Escape(element[Math.min(Math.max(txt.cursor.x, 0), len(txt.rows[txt.cursor.y])):])
 			//element = element[0:Math.max(txt.cursor.x-1, 0)] + "[:#00aeff]" + element[Math.max(txt.cursor.x-1, 0):Math.min(txt.cursor.x, 0)] + "[:-]" + element[Math.max(txt.cursor.x, 0):]
 			//element = tview.Escape(element[0:Math.max(txt.cursor.x-1, 0)]) + "[:#00aeff]" + tview.Escape(element[Math.max(txt.cursor.x-1, 0):Math.min(txt.cursor.x, len(element))]) + "[:-]" + tview.Escape(element[Math.max(txt.cursor.x, 0):])
 		}
 
+		for _, et := range pColorTheme.keywords {
 
+			element = strings.ReplaceAll(element, et.name, "["+et.color+"]"+et.name+"[#ffffff]")
 
-		for _, et := range pColorTheme.keywords{
-			
-			element = strings.ReplaceAll(element, et.name, "[" + et.color + "]" + et.name + "[#ffffff]")
-
-
-//			return i
+			//			return i
 			//ping <- true
 		}
-		
+
 		//lineColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
 
-		for i := 1; i < (mDigits-sDigits)+1; i++{space += " "}
+		for i := 1; i < (mDigits-sDigits)+1; i++ {
+			space += " "
+		}
 
 		lineNumbers := space + strconv.Itoa(index) + " [-:-:-]"
 
 		txt.rowSpacing = len(lineNumbers) - (7 + len(strconv.Itoa(index)))
 
 		final += NumberColor + lineNumbers + element + "\n"
-		
+
 	}
 
 	return final
 }
 
 func (txt *TextEditor) setLocation(pos position, spacing bool) {
-	if spacing{txt.cursor = position{x: pos.x - txt.rowSpacing, y: pos.y}} else{
+	if spacing {
+		txt.cursor = position{x: pos.x - txt.rowSpacing, y: pos.y}
+	} else {
 		txt.cursor = position{x: pos.x, y: pos.y}
 	}
 }
 
-
-func (txt *TextEditor) newLine(){
+func (txt *TextEditor) newLine() {
 	//app.Stop()
 	//fmt.Println(txt.rows[txt.cursor.y] + "--------")
 	txt.rows[txt.cursor.y] = txt.rows[txt.cursor.y][0:Math.max(txt.cursor.x, 0)] + "\n" + txt.rows[txt.cursor.y][Math.max(txt.cursor.x, 0):]
@@ -149,35 +150,35 @@ func (txt *TextEditor) newLine(){
 	list := strings.Split(temp, "\n")
 	txt.rows = make(map[int]string)
 
-
-//	fmt.Println(strings.Split(temp, "\n"))
+	//	fmt.Println(strings.Split(temp, "\n"))
 
 	//fmt.Println(temp + "-------------")
 
-	for index, element := range list{
-		if index+1 != len(list){
+	for index, element := range list {
+		if index+1 != len(list) {
 			txt.rows[index+1] = element
-	//		fmt.Println(index+1, ":" + element)
+			//		fmt.Println(index+1, ":" + element)
 		}
 	}
-
 
 	txt.moveDown()
 
 }
 
-func (txt *TextEditor) getText() string{
+func (txt *TextEditor) getText() string {
 	text := ""
+
+	fmt.Println(len(txt.rows))
 
 	for LOOP := 1; LOOP <= len(txt.rows); LOOP++ {
 		i := txt.rows[LOOP]
-		text+= i + "\n"
+		text += i + "\n"
 	}
 
 	return text
 }
 
-func (txt *TextEditor) loadText(text string){
+func (txt *TextEditor) loadText(text string) {
 	yMap := make(map[int]string)
 	for _, element := range strings.Split(text, "\n") {
 		yMap[len(yMap)+1] = element
@@ -186,115 +187,127 @@ func (txt *TextEditor) loadText(text string){
 
 	txt.cursor = position{x: 0, y: 0}
 }
- 
-func (txt *TextEditor) initCursor(){
+
+func (txt *TextEditor) initCursor() {
 	txt.cursor = position{x: 0, y: 0}
 }
 
-func (txt *TextEditor) deleteWord(){
+func (txt *TextEditor) deleteWord() {
 	lastWord := regexp.MustCompile(`\S+\s*$`)
 	newText := lastWord.ReplaceAllString(txt.rows[txt.cursor.y][:txt.cursor.x], "") + txt.rows[txt.cursor.y][txt.cursor.x:]
-	txt.cursor.x = Math.max(txt.cursor.x - (len(txt.rows[txt.cursor.y]) - len(newText)), 0)
+	txt.cursor.x = Math.max(txt.cursor.x-(len(txt.rows[txt.cursor.y])-len(newText)), 0)
 
-	if txt.cursor.x < 0 {txt.cursor.x = 0}
+	if txt.cursor.x < 0 {
+		txt.cursor.x = 0
+	}
 
 	txt.rows[txt.cursor.y] = newText
 }
 
-func (txt *TextEditor) deleteChar(){
+func (txt *TextEditor) deleteChar() {
 	//txt.rows[Math.min(len(txt.rows), txt.cursor.y)] = txt.rows[Math.min(len(txt.rows), txt.cursor.y)][0:Math.max(txt.cursor.x-1, 0)] + txt.rows[Math.min(len(txt.rows), txt.cursor.y)][Math.max(txt.cursor.x, 0):]
-	
-	txt.rows[txt.cursor.y] = txt.rows[txt.cursor.y][0:Math.max(txt.cursor.x-1, 0)] + txt.rows[txt.cursor.y][Math.max(txt.cursor.x, 0):]	
 
-	txt.cursor.x--
+	if len(txt.rows[txt.cursor.y]) <= 0 && txt.cursor.x <= 0 {
+		app.Stop()
 
-	deleted := false
-
-	salvage := func(mapy map[int]string, pos position) (map[int]string) {
-
-		retVal := make(map[int]string)
-
-		for LOOP := pos.y+1; LOOP <= len(mapy); LOOP++{
-			index := LOOP
-			element := txt.rows[LOOP]
-
-			retVal[index-1] = element
-			delete(mapy, index)
+		fmt.Println(":", len(txt.rows), ":")
+		delete(txt.rows, txt.cursor.y)
+		fmt.Println(":", len(txt.rows), ":")
+		temp := txt.getText()
+		fmt.Println(temp)
+		list := strings.Split(temp, "\n")
+		fmt.Println("len:", len(list), ":")
+		txt.rows = make(map[int]string)
+		for index, element := range list {
+			txt.rows[index+1] = element
+			fmt.Println(index + 1)
 		}
 
-		for index, element := range retVal {
-			mapy[index] = element
+		fmt.Println(":", len(txt.rows), ":")
+
+		txt.moveUp()
+	} else if txt.cursor.x > 0 {
+		txt.rows[txt.cursor.y] = txt.rows[txt.cursor.y][0:Math.min(Math.max(txt.cursor.x-1, 0), len(txt.rows[txt.cursor.y]))] + txt.rows[txt.cursor.y][txt.cursor.x:]
+		txt.moveLeft()
+	} else if txt.cursor.x <= 0 {
+		row := txt.rows[txt.cursor.y]
+		//pos := txt.cursor.y
+
+		delete(txt.rows, txt.cursor.y)
+
+		txt.rows[txt.cursor.y-1] += row
+
+		temp := txt.getText()
+		list := strings.Split(temp, "\n")
+		txt.rows = make(map[int]string)
+
+		//	fmt.Println(strings.Split(temp, "\n"))
+
+		//fmt.Println(temp + "-------------")
+
+		for index, element := range list {
+			txt.rows[index+1] = element
+			//		fmt.Println(index+1, ":" + element)
 		}
 
-		return mapy 
+		txt.moveUp()
 	}
-
-
-	if txt.cursor.x < 0 && len(txt.rows[txt.cursor.y]) <= 0 {
-
-		for LOOP := 1; LOOP <= len(txt.rows); LOOP++{
-			index := LOOP
-
-			if index == txt.cursor.y{
-				delete(txt.rows, index)
-				deleted = true
-			}
-		}
-	}
-
-	if deleted {
-		txt.rows = salvage(txt.rows, txt.cursor)
-	}
-
-	if txt.cursor.x < 0 {
-		txt.cursor.y = Math.max(1, txt.cursor.y-1)
-		txt.cursor.x = len(txt.rows[txt.cursor.y])
-	}
-	
 }
 
-func (txt *TextEditor) addChar(e string){
+func (txt *TextEditor) addChar(e string) {
 	txt.rows[txt.cursor.y] = txt.rows[txt.cursor.y][0:txt.cursor.x] + e + txt.rows[txt.cursor.y][txt.cursor.x:]
 	txt.cursor.x++
 }
 
-func (txt *TextEditor) moveUp(){
+func (txt *TextEditor) moveUp() {
 	txt.cursor.y = Math.max(0, txt.cursor.y-1)
-	if txt.cursor.x > len(txt.rows[txt.cursor.y]){txt.cursor.x=len(txt.rows[txt.cursor.y])}
-	if txt.cursor.x < len(txt.rows[txt.cursor.y]){txt.cursor.x=len(txt.rows[txt.cursor.y])}
+	if txt.cursor.x > len(txt.rows[txt.cursor.y]) {
+		txt.cursor.x = len(txt.rows[txt.cursor.y])
+	}
+	if txt.cursor.x < len(txt.rows[txt.cursor.y]) {
+		txt.cursor.x = len(txt.rows[txt.cursor.y])
+	}
 }
 
-func (txt *TextEditor) moveDown(){
+func (txt *TextEditor) moveDown() {
 	txt.cursor.y = Math.min(len(txt.rows), txt.cursor.y+1)
-	if txt.cursor.x > len(txt.rows[txt.cursor.y]){txt.cursor.x=len(txt.rows[txt.cursor.y])}
-	if txt.cursor.x < len(txt.rows[txt.cursor.y]){txt.cursor.x=len(txt.rows[txt.cursor.y])}
+	if txt.cursor.x > len(txt.rows[txt.cursor.y]) {
+		txt.cursor.x = len(txt.rows[txt.cursor.y])
+	}
+	if txt.cursor.x < len(txt.rows[txt.cursor.y]) {
+		txt.cursor.x = len(txt.rows[txt.cursor.y])
+	}
 }
 
-func (txt *TextEditor) enter(){
+func (txt *TextEditor) enter() {
 	txt.rows[len(txt.rows)+1] = txt.rows[txt.cursor.y][txt.cursor.x:]
 	txt.rows[txt.cursor.y] = txt.rows[txt.cursor.y][0:txt.cursor.x]
 	txt.cursor.y++
 }
 
-func (txt *TextEditor) moveRight(){
-	if(txt.cursor.x + 1 >= len(txt.rows[txt.cursor.y])){
+func (txt *TextEditor) moveRight() {
+	if txt.cursor.x+1 >= len(txt.rows[txt.cursor.y]) {
 		txt.cursor.y = Math.min(txt.cursor.y+1, len(txt.rows))
 		txt.cursor.x = 0
-	}else{txt.cursor.x = Math.min(txt.cursor.x+1, len(txt.rows[txt.cursor.y]))}
+	} else {
+		txt.cursor.x = Math.min(txt.cursor.x+1, len(txt.rows[txt.cursor.y]))
+	}
 	//txt.cursor.x = Math.max()
 }
 
-func (txt *TextEditor) moveLeft(){
-	if(txt.cursor.x - 1 <= 0){
+func (txt *TextEditor) moveLeft() {
+	if txt.cursor.x-1 <= 0 {
 		txt.cursor.y = Math.max(txt.cursor.y-1, 1)
 		txt.cursor.x = len(txt.rows[txt.cursor.y])
-	}else{txt.cursor.x = Math.max(txt.cursor.x-1, 0)}
+	} else {
+		txt.cursor.x = Math.max(txt.cursor.x-1, 0)
+	}
 }
 
-func (txt *TextEditor) moveWordLeft(){
+func (txt *TextEditor) moveWordLeft() {
 	txt.cursor.x = len(regexp.MustCompile(`\S+\s*$`).ReplaceAllString(txt.rows[txt.cursor.y][:txt.cursor.x], ""))
 }
 
-func (txt *TextEditor) moveWordRight(){
+func (txt *TextEditor) moveWordRight() {
 	txt.cursor.x = len(txt.rows[txt.cursor.y]) - len(regexp.MustCompile(`^\s*\S+\s*`).ReplaceAllString(txt.rows[txt.cursor.y][txt.cursor.x:], ""))
 }
