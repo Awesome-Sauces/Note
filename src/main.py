@@ -8,4 +8,3 @@ class fmt:
 		print(e)
 
 fmt.Println("Hello World")
-

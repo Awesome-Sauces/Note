@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	//	"time"
-	_ "fmt"
+_	 "fmt"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -67,7 +67,7 @@ func (ct *ColorTheme) changeName(name string) {
 // Save file, if it has UNOWN_FILE flag
 // then create the file
 func (v *NoteFile) saveFile() {
-	d1 := []byte(v.editor.getText())
+	d1 := []byte(v.editor.saveFile())
 
 	if strings.Contains(v.filename, "(**|**)") {
 		myfile, e := os.Create(strings.ReplaceAll(v.filename, "(**|**)", ""))
@@ -83,42 +83,6 @@ func (v *NoteFile) saveFile() {
 
 // Draw the cursor to the screen
 func (v *NoteFile) drawCursor() {
-	/*
-	   	var vFile string
-
-	   	var zFile string
-
-	   //	if v.position > len(v.text) {
-	   	//	v.position = len(v.text)
-	   //	}
-
-	   	lineColor := "[" + pColorTheme.lnColor + ":" + pColorTheme.lnbgColor + ":" + pColorTheme.lnstyleColor + "]"
-
-	   	for _, et := range pColorTheme.keywords{
-	   		vFile = strings.ReplaceAll(vFile, et.name, "[" + et.color + "]" + et.name + "[#ffffff]")
-	   	}
-
-
-	   	for index, element := range strings.Split(vFile, "\n") {
-	   		space := ""
-
-	   		mDigits := iterativeDigitsCount(len(strings.Split(vFile, "\n")))
-	   		sDigits := iterativeDigitsCount(index+1)
-
-	   		for i := 1; i < (mDigits-sDigits)+1; i++ {
-	   		    space += " "
-	   		}
-
-	   		zFile += lineColor + space + strconv.Itoa(index+1) + " [-:-:-] " + element + "\n"
-	   	}
-	*/
-
-	//	vFile = tview.Escape(v.text) + color + " [:-]"
-
-	//	if v.position >= 0 {
-	//		vFile = tview.Escape(v.text[0:Math.max(v.position-1, 0)]) + color + tview.Escape(v.text[Math.max(v.position-1, 0):v.position]) + "[:-]" + tview.Escape(v.text[v.position:])
-	//	}
-
 	v.textView.Clear()
 
 	v.textView.SetText(v.editor.finalize())
@@ -135,67 +99,86 @@ func (v NoteFile) getFormat() string {
 func (v *NoteFile) NewInputManager() {
 	v.textView.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// If the app isn't focus'd on this view then ignore input
+		key := event.Key()
+		run := event.Rune()
+		letter := string(run)
+
 		if !v.textView.HasFocus() {
 			return event
 		}
 
-		if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModCtrl {
+		if key == tcell.KeyLeft && event.Modifiers() == tcell.ModCtrl {
 			// Skip one word left on left arrow + shift
 			v.editor.moveWordLeft()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModCtrl {
+		} else if key == tcell.KeyRight && event.Modifiers() == tcell.ModCtrl {
 			// Skip one word right on right arrow + shift
 			v.editor.moveWordRight()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyCtrlW {
+		} else if key == tcell.KeyCtrlW {
 			// Delete one word right
 			v.editor.deleteWord()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyLeft {
+		} else if key == tcell.KeyLeft {
 			// Left Arrow key
 			v.editor.moveLeft()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyRight {
+		} else if key == tcell.KeyRight {
 			// Right Arrow key
 			v.editor.moveRight()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyUp {
+		} else if key == tcell.KeyUp {
 			// Up Arrow key
 			v.editor.moveUp()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyDown {
+		} else if key == tcell.KeyDown {
 			// Down Arrow key
 			v.editor.moveDown()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyEnter {
+		} else if key == tcell.KeyEnter {
 			// "Newline"/Enter key
 			v.editor.newLine()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyDEL {
+		} else if key == tcell.KeyDEL {
 			// Deleting characters at cursor position
 			v.editor.deleteChar()
 			v.drawCursor()
 			return event
-		} else if event.Key() == tcell.KeyESC {
+		} else if key == tcell.KeyESC {
 			// On escape key save and exit
 			// To-do:
 			// Make it only close the file that ESC was pressed on
-			v.saveFile()
 			app.Stop()
+
+			v.saveFile()
+
+			return event
 		} else {
 			// Handling normal
 			// Characters
-			v.editor.addChar(string(event.Rune()))
+			if key == tcell.KeyRune || key == tcell.KeyTab{
+				v.editor.addChar(string(run))
+			}
 
 			v.drawCursor()
+
+			if letter == "h" ||
+			letter == "l" ||
+			letter == "j" ||
+			letter == "k" ||
+			letter == "g" ||
+			letter == "G" {
+				return nil
+			}
+
 
 			return event
 
@@ -208,9 +191,9 @@ func (v *NoteFile) NewInputManager() {
 		if action == tview.MouseLeftClick {
 			row, column := event.Position()
 
-			v.textView.ScrollTo(event.Position())
+			v.textView.ScrollTo(row, column)
 
-			v.editor.setLocation(position{x: column, y: row}, true)
+			v.editor.setLocation(position{x: row, y: column}, true)
 
 			v.drawCursor()
 
@@ -244,9 +227,6 @@ func (v *NoteFile) startTheme() {
 func iterativeDigitsCount(number int) int {
 
 	str := strconv.Itoa(number)
-	//	str = strings.ReplaceAll(str, ".", "")
-
-	//	fmt.Println(len(str))
 
 	return len(str)
 }

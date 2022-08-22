@@ -33,7 +33,10 @@ type Token struct{
 }
 
 func (math mathlib) isDigit(str string) bool {
-	for i := range math.digits {if str == math.digits[i] {return true}}
+	for LOOP := 0; LOOP <= len(math.digits); LOOP++ {
+		if str == math.digits[LOOP] {return true}
+	}
+
 	return false
 }
 
@@ -46,7 +49,10 @@ func (math mathlib) min(a int, b int) int {
 }
 
 func (math mathlib) containsList(a string, b map[int]string) bool {
-	for i := range b {if strings.Contains(a, b[i]) {return true}}
+	for LOOP := 0; LOOP <= len(b); LOOP++ {
+		if strings.Contains(a, b[LOOP]) {return true}
+	}
+
 	return false
 }
 

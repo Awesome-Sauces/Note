@@ -1,10 +1,13 @@
+# This is just an example Color Theme
+# This contains a background color and some syntax highlighting 
+# Please use this as a guide for creating more themes!
+# There will be more updates to this scripting lang in the future!
+
 string $y = "#303030";
 
 string $numColor = "#b2b2b2";
 string $shadow = "#4e4e4e";
 string $style = "b";
-
-int $loc = 5;
 
 Background($y);
 

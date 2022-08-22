@@ -39,12 +39,9 @@ var NOTE_HELP string = NOTE_VERSION + "\n\n" +
 	"Usage: note [-arg]\n" +
 	"    note [--help]\n" +
 	"    note [filename]\n" +
-	"    note [-txt] [color]\n" +
-	"    note [-bg] [color]\n" +
-	"Experimental:\n" +
-	"    note -script [SCRIPT_NAME]\n" +
-	"Color list:\n" +
-	"    [white]\n    [red]\n    [black]\n    [blue]\n    [green]\n    [purple]\n    [yellow]\n"
+	"Color Themes:\n" +
+	"    note [-deploy] [filename]\n" +
+	"    note [-script] [filename]\n" 
 
 func main() {
 	// Checks args given to cli, if none are

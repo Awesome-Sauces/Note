@@ -17,58 +17,42 @@ func CheckArgs() {
 	if len(os.Args) > 1 && os.Args[1] == "--help" {
 		fmt.Printf("%s", NOTE_HELP)
 		os.Exit(1)
-	} else if len(os.Args) > 1 && os.Args[1] == "-test" {
+	} else if len(os.Args) > 1 && os.Args[1] == "-deploy" {
+		fmt.Printf("If permission is denied please\ncheck if note is a locked directory\n\n")
+	
+		if len(os.Args) <= 2 {
+			fmt.Printf("To deploy your color theme to local\n"+
+						"note installation please provide the file name\n" + 
+						"that contains your theme.")
+			os.Exit(1)
+		}
 
-		/*
-				editor := TextEditor{rowSpacing: 3}
+		dirname, err := os.UserHomeDir()
+		dir = dirname + "/note/themes.rocky"
 
-				var det, er = os.ReadFile(os.Args[2])
-				check(er)
+		check(err)
 
-				//fmt.Println(string(det))
-				editor.loadText(string(det)"print('Hello World')\ndef main:\nprint('Main')")
-				//editor.moveRight()
+		var dat, errr = os.ReadFile(os.Args[2])
+		check(errr)
 
+		d1 := []byte(string(dat))
 
-				var dat, err = os.ReadFile("note.rocky")
+		write := os.WriteFile(dir, d1, 0644)
+		check(write)
 
-				check(err)
-
-				var txt string = string(dat)
-
-			//	for i, s := range os.Args {if i > 1{txt+=s + " "}}
-
-				lex := Lexer{text: txt,
-							 position: 0,
-							 }
-				lex.lex()
-
-				lex.eval()
-
-
-
-
-				//editor.deleteChar()
-				//editor.deleteChar()
-
-				fmt.Println(editor.finalize())
-				editor.newLine()
-				fmt.Println(editor.finalize())
-		*/
-		mapy := make(map[int]string)
-
-		mapy[1] = "Hello"
-		mapy[2] = "World"
-		fmt.Println(len(mapy))
-		delete(mapy, 2)
-		fmt.Println(len(mapy))
+		fmt.Printf("Success!")
 
 		os.Exit(1)
 	} else if len(os.Args) > 1 && os.Args[1] == "-script" {
+		if len(os.Args) <= 2 {
+			fmt.Printf("Please enter script filename\n")
+			os.Exit(1)
+		}
+	
 		fmt.Printf("%s\n\n", NOTE_VERSION)
 		fmt.Printf("Running Rocky Runtime-Enviroment\n")
 
-		var dat, err = os.ReadFile("note.rocky")
+		var dat, err = os.ReadFile(os.Args[2])
 
 		check(err)
 
@@ -76,9 +60,7 @@ func CheckArgs() {
 
 		//	for i, s := range os.Args {if i > 1{txt+=s + " "}}
 
-		lex := Lexer{text: txt,
-			position: 0,
-		}
+		lex := Lexer{text: txt,position: 0,}
 		lex.lex()
 
 		lex.eval()
@@ -88,13 +70,16 @@ func CheckArgs() {
 		fmt.Printf("%s", NOTE_HELP)
 		os.Exit(1)
 	} else if len(os.Args) >= 1 {
-		var dat, err = os.ReadFile("note.rocky")
+
+		dirname, err := os.UserHomeDir()
+		dir = dirname + "/note/themes.rocky"
 
 		check(err)
+		var dat, errorr = os.ReadFile(dir)
+
+		check(errorr)
 
 		var txt string = string(dat)
-
-		//	for i, s := range os.Args {if i > 1{txt+=s + " "}}
 
 		lex := Lexer{text: txt,
 			position: 0,

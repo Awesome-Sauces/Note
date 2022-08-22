@@ -97,6 +97,8 @@ func (lex *Lexer) eval(){
 					LOOP.run(variables, lists)
 				}
 
+				delete(variables, VARIABLE.name)
+
 				i = endofLoop
 				
 		}else if lex.tokens[i].token == "type" &&
@@ -319,7 +321,8 @@ func (funct *function) stdlib(){
 
 		output := ""
 
-		for i := range funct.kwargs {output += funct.kwargs[i]}
+		for LOOP := 0; LOOP <= len(funct.kwargs); LOOP++ {output += funct.kwargs[LOOP]}
+		
 		Debug.out(strings.ReplaceAll(output, "\"", ""))
 	case "sleep":
 		strVar := funct.kwargs[0]
@@ -327,7 +330,7 @@ func (funct *function) stdlib(){
 		check(err)
 		time.Sleep(time.Duration(intVar) * time.Second)
 	case "memory":
-		    // convert to uintptr
+	// convert to uintptr
     //	var adr uint64
     //	adr, err := strconv.ParseUint(&funct.kwargs[0], 0, 64)
    	//	check(err)
