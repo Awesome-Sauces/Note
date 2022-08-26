@@ -20,7 +20,9 @@ curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/TextEditor.g
 curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/themes/theme.rocky --output theme.rocky
 curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go --output note.go
 curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/structs.go --output structs.go
-curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/config.go --output config.go
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/eval.go --output eval.go
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/lexer.go --output lexer.go
+curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/debug.go --output debug.go
 curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/commands.go --output commands.go
 curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod --output go.mod
 curl https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.sum --output go.sum
@@ -31,7 +33,9 @@ sudo mv -i note /usr/bin
 sudo note -deploy theme.rocky
 rm note.go
 rm structs.go
-rm config.go
+rm eval.go
+rm lexer.go
+rm debug.go
 rm commands.go
 rm go.sum
 rm go.mod
