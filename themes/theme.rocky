@@ -1,0 +1,24 @@
+# This is just an example Color Theme
+# This contains a background color and some syntax highlighting 
+# Please use this as a guide for creating more themes!
+# There will be more updates to this scripting lang in the future!
+
+string $y = "#303030";
+
+string $numColor = "#b2b2b2";
+string $shadow = "#4e4e4e";
+string $style = "b";
+
+Background($y);
+
+LineColors($numColor, $style, $shadow);
+
+printf("Background set to " $y);
+
+
+list $keywords = ["for", "while", "def", "class", "print", "fmt", "Println", "'", "Math", "var"];
+list $colors = ["#ff87ff", "#ff87ff", "#ff87ff", "#ff87ff", "#5f87d7", "#5f87d7", "#ff87ff", "#5f87d7", "#5f87d7", "#5f87d7"];
+
+loop($keywords){
+	NewKeyword(".py", $keywords[$loop], $colors[$loop])	
+}

@@ -1,231 +1,232 @@
 package main
 
-import(
-	"github.com/rivo/tview"
-	"github.com/gdamore/tcell/v2"
-	"regexp"
-	"strings"
+import (
 	"os"
+	//	"regexp"
 	"strconv"
+	"strings"
+
+	//	"time"
+_	 "fmt"
+
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 // Cursor color
-var color string = "[#00aeff:#00aeff:lb]"
+var color string = "[:#00aeff]"
 
-
-// NoteFile, utilized to simply 
+// NoteFile, utilized to simply
 // TextView and other management
-type NoteFile struct{
+type NoteFile struct {
 	textView *tview.TextView
-	position int
-	text string
 	filename string
-	order int
+	order    int
+	editor   TextEditor
 }
 
+type ColorTheme struct {
+	name         string
+	lnColor      string
+	lnbgColor    string
+	bgColor      string
+	lnstyleColor string
+	keywords     map[string]cKeyWord
+}
+
+type cKeyWord struct {
+	extension string
+	name      string
+	color     string
+}
+
+func (ct *ColorTheme) setStyleColor(color string) {
+	ct.lnstyleColor = color
+}
+
+func (ct *ColorTheme) setlnColor(color string) {
+	ct.lnColor = color
+}
+
+func (ct *ColorTheme) setlnbgColor(color string) {
+	ct.lnbgColor = color
+}
+
+func (ct *ColorTheme) changeBGcolor(color string) {
+	ct.bgColor = color
+}
+
+func (ct *ColorTheme) NewKeyword(e cKeyWord) {
+	ct.keywords[e.name] = e
+}
+
+func (ct *ColorTheme) changeName(name string) {
+	ct.name = name
+}
 
 // Save file, if it has UNOWN_FILE flag
 // then create the file
-func (v *NoteFile) saveFile(){
-	d1 := []byte(v.text)
+func (v *NoteFile) saveFile() {
+	d1 := []byte(v.editor.saveFile())
 
-	if strings.Contains(v.text, "(**|**)"){
-	    myfile, e := os.Create(strings.ReplaceAll(v.text, "(**|**)", ""))
-    	check(e)
-    	myfile.Close()
+	if strings.Contains(v.filename, "(**|**)") {
+		myfile, e := os.Create(strings.ReplaceAll(v.filename, "(**|**)", ""))
+		check(e)
+		myfile.Close()
 		err := os.WriteFile(v.filename, d1, 0644)
 		check(err)
 	}
-	
+
 	err := os.WriteFile(v.filename, d1, 0644)
 	check(err)
 }
 
-// Update position by 1 or by -1
-func (v *NoteFile) updatePos(e bool){if e{v.position++}else if v.position > 0{v.position--}}
-
 // Draw the cursor to the screen
-func (v *NoteFile) drawCursor(){
-	
-	var vFile string
-
-	var zFile string
-
-	if v.position > len(v.text) {v.position = len(v.text)}
-
-	vFile = TextColorGlobal + tview.Escape(v.text) + color + " [-:-:-]" + TextColorGlobal
-
-	if v.position >= 0 {vFile = TextColorGlobal + tview.Escape(v.text[0:v.position]) + color + " [-:-:-]" + TextColorGlobal + tview.Escape(v.text[v.position:])} 
-
-	for index, element := range strings.Split(vFile, "\n") {zFile += "[red]" + strconv.Itoa(index+1) + TextColorGlobal + " " + element + "\n"}
-
+func (v *NoteFile) drawCursor() {
 	v.textView.Clear()
 
-	v.textView.Write([]byte(zFile))
+	v.textView.SetText(v.editor.finalize())
+
+	//v.textView.Write([]byte(v.editor.finalize()))
+}
+
+func (v NoteFile) getFormat() string {
+	return v.editor.getFormat()
 }
 
 // Handle arrow key movement, input
 // Deletion, etc
-func (v *NoteFile) NewInputManager(){
+func (v *NoteFile) NewInputManager() {
 	v.textView.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// If the app isn't focus'd on this view then ignore input
-		if(!v.textView.HasFocus()) {return event}
-		// Skip one word left on left arrow + shift
-		if event.Key() == tcell.KeyLeft && event.Modifiers() == tcell.ModShift {
-			v.setPos(len(regexp.MustCompile(`\S+\s*$`).ReplaceAllString(v.text[:v.position], "")))
-			v.drawCursor()
-			return event
-		// Skip one word right on right arrow + shift
-		} else if event.Key() == tcell.KeyRight && event.Modifiers() == tcell.ModShift {
-			v.setPos(len(v.text) - len(regexp.MustCompile(`^\s*\S+\s*`).ReplaceAllString(v.text[v.position:], "")))
-			v.drawCursor()
-			return event
-		// Delete one word right
-		} else if event.Key() == tcell.KeyCtrlW {
-			lastWord := regexp.MustCompile(`\S+\s*$`)
-			newText := lastWord.ReplaceAllString(v.text[:v.position], "") + v.text[v.position:]
-			v.position -= len(v.text) - len(newText)
+		key := event.Key()
+		run := event.Rune()
+		letter := string(run)
 
-			if v.position < 0 {
-				v.position = 0
-			}
+		if !v.textView.HasFocus() {
+			return event
+		}
 
-			v.text = newText
+		if key == tcell.KeyLeft && event.Modifiers() == tcell.ModCtrl {
+			// Skip one word left on left arrow + shift
+			v.editor.moveWordLeft()
 			v.drawCursor()
 			return event
-		// Left Arrow key
-		} else if event.Key() == tcell.KeyLeft {
-			v.updatePos(false)
+		} else if key == tcell.KeyRight && event.Modifiers() == tcell.ModCtrl {
+			// Skip one word right on right arrow + shift
+			v.editor.moveWordRight()
 			v.drawCursor()
 			return event
-		// Right Arrow key
-		} else if event.Key() == tcell.KeyRight {
-			v.updatePos(true)
+		} else if key == tcell.KeyCtrlW {
+			// Delete one word right
+			v.editor.deleteWord()
 			v.drawCursor()
 			return event
-		// Up Arrow key
-		} else if event.Key() == tcell.KeyUp {
-			for i := v.position; i > 0; i-- {
-				if v.text[i-1:i] == "\n" || v.text[i-1:i] == "\r\n" || v.text[i-1:i] == "\r" {
-					v.setPos(i - 1)
-					v.drawCursor()
-					return event
-				}
-			}
-			return event
-		// Down Arrow key
-		} else if event.Key() == tcell.KeyDown {
-			for i := v.position; i >= 0; i++ {
-				if i+1 <= len(v.text) {
-					if v.text[i:i+1] == "\n" || v.text[i:i+1] == "\r\n" || v.text[i:i+1] == "\r" {
-						v.setPos(i + 1)
-						v.drawCursor()
-						return event
-					}
-				} else {
-					return event
-				}
-			}
-			return event
-		// "Newline"/Enter key
-		} else if event.Key() == tcell.KeyEnter {
-			v.text = v.text[0:v.position] + "\n" + v.text[v.position:]
-			v.updatePos(true)
+		} else if key == tcell.KeyLeft {
+			// Left Arrow key
+			v.editor.moveLeft()
 			v.drawCursor()
 			return event
-		// Deleting characters at cursor position
-		} else if event.Key() == tcell.KeyDEL {
-
-			if len(v.text) > 0 && v.position-1 != -1 {
-				v.text = v.text[0:v.position-1] + v.text[v.position:]
-				v.updatePos(false)
-				v.drawCursor()
-
-				return event
-			}
-
+		} else if key == tcell.KeyRight {
+			// Right Arrow key
+			v.editor.moveRight()
+			v.drawCursor()
 			return event
-		// On escape key save and exit
-		// To-do:
-		// Make it only close the file that ESC was pressed on
-		} else if event.Key() == tcell.KeyESC {
-			v.saveFile()
+		} else if key == tcell.KeyUp {
+			// Up Arrow key
+			v.editor.moveUp()
+			v.drawCursor()
+			return event
+		} else if key == tcell.KeyDown {
+			// Down Arrow key
+			v.editor.moveDown()
+			v.drawCursor()
+			return event
+		} else if key == tcell.KeyEnter {
+			// "Newline"/Enter key
+			v.editor.newLine()
+			v.drawCursor()
+			return event
+		} else if key == tcell.KeyDEL {
+			// Deleting characters at cursor position
+			v.editor.deleteChar()
+			v.drawCursor()
+			return event
+		} else if key == tcell.KeyESC {
+			// On escape key save and exit
+			// To-do:
+			// Make it only close the file that ESC was pressed on
 			app.Stop()
-		// Handling normal
-		// Characters
-		}else {
 
-			if v.position == len(v.text) {
-				v.text += string(event.Rune())
-			} else {v.text = v.text[0:v.position] + string(event.Rune()) + v.text[v.position:]}
+			v.saveFile()
 
-			v.updatePos(true)
+			return event
+		} else {
+			// Handling normal
+			// Characters
+			if key == tcell.KeyRune || key == tcell.KeyTab{
+				v.editor.addChar(string(run))
+			}
+
 			v.drawCursor()
+
+			if letter == "h" ||
+			letter == "l" ||
+			letter == "j" ||
+			letter == "k" ||
+			letter == "g" ||
+			letter == "G" {
+				return nil
+			}
+
 
 			return event
 
 		}
 		return event
 	})
+
+	v.textView.SetMouseCapture(func(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
+
+		if action == tview.MouseLeftClick {
+			row, column := event.Position()
+
+			v.textView.ScrollTo(row, column)
+
+			v.editor.setLocation(position{x: row, y: column}, true)
+
+			v.drawCursor()
+
+		}
+
+		return action, event
+	})
 }
 
 // Re-instantize the textview
-func (v NoteFile) autoCreateTextView(){
+func (v NoteFile) autoCreateTextView() {
 	v.startTheme()
 	v.NewInputManager()
 }
 
 // Load color scheme and other data
-func (v *NoteFile) startTheme(){
-	switch BackGroundColorGlobal {
-			case "[red]":
-				v.textView.SetBackgroundColor(tcell.ColorRed)
-			case "[green]":
-				v.textView.SetBackgroundColor(tcell.ColorGreen)
-			case "[yellow]":
-				v.textView.SetBackgroundColor(tcell.ColorYellow)
-			case "[blue]":
-				v.textView.SetBackgroundColor(tcell.ColorBlue)
-			case "[purple]":
-				v.textView.SetBackgroundColor(tcell.ColorPurple)
-			case "[black]":
-				v.textView.SetBackgroundColor(tcell.NewRGBColor(30, 30, 30))
-			case "[white]":
-				v.textView.SetBackgroundColor(tcell.ColorWhite)
-			}
-	
-			v.textView.SetTitleColor(tcell.ColorBlack)
-			v.textView.SetTitleAlign(tview.AlignCenter)
-	
-			v.textView.SetBorder(true)
-			v.textView.SetTitle(TextColorGlobal + "[" + v.filename + "]	 Click esc to quit!")
-			v.textView.SetBorderColor(tcell.ColorBlack)
-			v.textView.SetBorderAttributes(tcell.AttrDim)
-	
-			v.position = 0
-	
-	
-			v.textView.SetText(v.getStringFormat())
+func (v *NoteFile) startTheme() {
+	v.textView.SetBackgroundColor(tcell.GetColor(pColorTheme.bgColor))
+
+	v.textView.SetTitleColor(tcell.ColorBlack)
+	v.textView.SetTitleAlign(tview.AlignCenter)
+
+	v.textView.SetBorder(true)
+	v.textView.SetTitle("[" + v.filename + "]	 Click esc to quit!")
+	v.textView.SetBorderColor(tcell.ColorBlack)
+	v.textView.SetBorderAttributes(tcell.AttrDim)
+
+	v.textView.SetText(v.editor.getFormat())
 }
 
-// Get the file with color format excluding cursor
-func (v NoteFile) getStringFormat() string{
+func iterativeDigitsCount(number int) int {
 
-	tempText := tview.Escape(v.text)
+	str := strconv.Itoa(number)
 
-	stringReturn := ""
-
-	for index, element := range strings.Split(tempText, "\n"){
-		stringReturn += "[red]" + strconv.Itoa(index+1) + TextColorGlobal + " " + element + "\n"
-	}
-
-	return stringReturn
-}
-
-
-// Setting postion
-// to specific location
-func (v *NoteFile) setPos(e int) {
-	if e > len(v.text) {return}
-	v.position = e
+	return len(str)
 }
