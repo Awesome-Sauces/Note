@@ -71,6 +71,17 @@ loop($keywords){
 	NewKeyword(".py", $keywords[$loop], $colors[$loop])	
 }
 ```
+## Deploying and Testing
+To test a script please run this command
+```
+note -script filename
+```
+To deploy a color theme to note please do this command
+```
+note -deploy filename
+```
+It will automatically set it as the current running theme.
+
 ## Adding functionability
 For now rocky is under development but will recieve much more additions in the future but for now to add
 more to the rocky language if you wish please edit the eval.go or lexer.go and make a pull request. If you
