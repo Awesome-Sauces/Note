@@ -1,4 +1,4 @@
-# Installing
+# Installing (Golang 18.0 & up required)
 To install note on your computer, all you have to do is obtain the executable 
 and make sure you have access to it globaly and that the executable supports your operating system. Note current only
 has working installers for Arch Linux and Ubunut **(Not sure about debian as a whole, ubuntu installer might also work for other debian based installations)**
