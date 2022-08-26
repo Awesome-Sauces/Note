@@ -36,6 +36,10 @@ To install note there are various ways to do so, one way that is simple is downl
 ```
 sh build.sh
 ```
+## Color themes
+For help on creating color themes please use this [guide](https://github.com/Awesome-Sauces/Note/blob/1.3.2/themes/README.md)
+
+
 If you have any recommendations or bugs about Note, please feel free to open an issue and report them.
 
 A text editor for the Linux Terminal! (Mainly compatible with Arch, because I made it on there)
