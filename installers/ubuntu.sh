@@ -25,19 +25,24 @@ sudo mv -i themes.rocky ~/note
 # Grabs Newest version of Note
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/note.go
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/structs.go
-wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/config.go
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/commands.go
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.mod
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/go.sum
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/build.sh
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/TextEditor.go
 wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/themes/theme.rocky
+wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/eval.go
+wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/lexer.go
+wget https://raw.githubusercontent.com/Awesome-Sauces/Note/main/src/debug.go
+
 sh build.sh
 sudo mv -i note /usr/bin
 sudo note -deploy theme.rocky
 rm note.go
 rm structs.go
-rm config.go
+rm eval.go
+rm lexer.go
+rm debug.go
 rm TextEditor.go
 rm theme.rocky
 rm commands.go
