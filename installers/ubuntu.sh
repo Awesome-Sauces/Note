@@ -7,7 +7,7 @@ then
 	if  [ $request == "y" ]
 		then
 			# Installs Golang 1.17
-			(cd /tmp; wget https://golang.org/dl/go1.17.linux-amd64.tar.gz)
+			(cd /tmp; wget https://golang.org/dl/go1.18.linux-amd64.tar.gz)
 			(cd /tmp; tar -xzvf go1.18.linux-amd64.tar.gz)
 			(cd /tmp; sudo mv go /usr/local)
 			(cd /tmp; rm -rf go)
