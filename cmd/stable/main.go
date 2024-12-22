@@ -1,36 +1,26 @@
-//go:build ignore
-// +build ignore
-
-// Copyright 2024 The TCell Authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use file except in compliance with the License.
-// You may obtain a copy of the license at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-// unicode just displays a Unicode test on your screen.
-// Press ESC to exit the program.
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/gdamore/tcell/v2/encoding"
-	runewidth "github.com/mattn/go-runewidth"
+	"github.com/mattn/go-runewidth"
 )
 
-var row = 0
-var style = tcell.StyleDefault
+// CenterPosition calculates the center row and column (y, x) for a given string
+// based on the screen's current size.
+func CenterPosition(s tcell.Screen, text string) (int, int) {
+	screenWidth, screenHeight := s.Size()
+	textWidth := runewidth.StringWidth(text)
 
+	// row = vertical center, col = horizontal center
+	row := screenHeight / 2
+	col := (screenWidth - textWidth) / 2
+
+	return row, col
+}
+
+// puts is your original function for drawing a string on the screen
 func puts(s tcell.Screen, style tcell.Style, x, y int, str string) {
 	i := 0
 	var deferred []rune
@@ -81,148 +71,71 @@ func puts(s tcell.Screen, style tcell.Style, x, y int, str string) {
 }
 
 func main() {
-
-	s, e := tcell.NewScreen()
-	if e != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", e)
-		os.Exit(1)
+	// Create a new screen
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		log.Fatalf("Error creating screen: %v", err)
 	}
 
-	encoding.Register()
+	// Initialize the screen (enters alt-screen mode on most terminals)
+	if err := screen.Init(); err != nil {
+		log.Fatalf("Error initializing screen: %v", err)
+	}
+	defer screen.Fini()
 
-	if e = s.Init(); e != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", e)
-		os.Exit(1)
+	// Use the terminal’s default foreground and background colors
+	defStyle := tcell.StyleDefault.
+		Foreground(tcell.ColorDefault).
+		Background(tcell.ColorDefault)
+	screen.SetStyle(defStyle)
+
+	// Clear the screen
+	screen.Clear()
+
+	// Our message
+	message := "NOTE v0.0.1"
+
+	// Example style
+	style := tcell.StyleDefault.
+		Foreground(tcell.ColorWhite)
+
+	row_resizer := 7
+
+	// Compute the center row & col for the message
+	centerRow, centerCol := CenterPosition(screen, message)
+
+	centerRow -= row_resizer
+
+	if centerRow < 0 {
+		centerRow = 0
 	}
 
-	plain := tcell.StyleDefault
-	bold := style.Bold(true)
+	// Draw the message in the center (remember that in `puts`, the order is x, y)
+	puts(screen, style, centerCol, centerRow, message)
 
-	s.SetStyle(tcell.StyleDefault.
-		Foreground(tcell.ColorBlack).
-		Background(tcell.ColorWhite))
-	s.Clear()
+	screen.Show()
 
-	quit := make(chan struct{})
-
-	style = bold.Foreground(tcell.ColorBlue).Background(tcell.ColorSilver)
-
-	row = 2
-	puts(s, style, 2, row, "Press ESC to Exit")
-	row = 4
-	puts(s, plain, 2, row, "Note: Style support is dependent on your terminal.")
-	row = 6
-
-	plain = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite)
-
-	style = plain
-	puts(s, style, 2, row, "Plain")
-	row++
-
-	style = plain.Blink(true)
-	puts(s, style, 2, row, "Blink")
-	row++
-
-	style = plain.Reverse(true)
-	puts(s, style, 2, row, "Reverse")
-	row++
-
-	style = plain.Dim(true)
-	puts(s, style, 2, row, "Dim")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Underline")
-	row++
-
-	style = plain.Italic(true)
-	puts(s, style, 2, row, "Italic")
-	row++
-
-	style = plain.Bold(true)
-	puts(s, style, 2, row, "Bold")
-	row++
-
-	style = plain.Bold(true).Italic(true)
-	puts(s, style, 2, row, "Bold Italic")
-	row++
-
-	style = plain.Bold(true).Italic(true).Underline(true)
-	puts(s, style, 2, row, "Bold Italic Underline")
-	row++
-
-	style = plain.StrikeThrough(true)
-	puts(s, style, 2, row, "Strikethrough")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Double Underline")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Curly Underline")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Dotted Underline")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Dashed Underline")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Blue Underline")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Firebrick Underline")
-	row++
-
-	style = plain.Underline(true)
-	puts(s, style, 2, row, "Pink Curly Underline")
-	row++
-
-	style = plain.Url("http://github.com/gdamore/tcell")
-	puts(s, style, 2, row, "HyperLink")
-	row++
-
-	style = plain.Foreground(tcell.ColorRed)
-	puts(s, style, 2, row, "Red Foreground")
-	row++
-
-	style = plain.Foreground(tcell.ColorAqua)
-	puts(s, style, 2, row, "T")
-	style = plain.Foreground(tcell.ColorGreen)
-	puts(s, style, 1, row, "H")
-	style = plain.Foreground(tcell.Color105)
-	puts(s, style, 3, row, "H")
-	row++
-
-	style = plain.Background(tcell.ColorRed)
-	puts(s, style, 2, row, "Red Background")
-	row++
-
-	s.Show()
-	go func() {
-		for {
-			ev := s.PollEvent()
-			switch ev := ev.(type) {
-			case *tcell.EventKey:
-				switch ev.Key() {
-				case tcell.KeyEscape, tcell.KeyEnter:
-					close(quit)
-					return
-				case tcell.KeyCtrlL:
-					s.Sync()
-				}
-			case *tcell.EventResize:
-				s.Sync()
+	// Event loop: wait for ESC key to exit
+	for {
+		ev := screen.PollEvent()
+		switch event := ev.(type) {
+		case *tcell.EventKey:
+			if event.Key() == tcell.KeyEscape {
+				return
 			}
+		case *tcell.EventResize:
+			// Clear & redraw on resize
+			screen.Clear()
+			centerRow, centerCol := CenterPosition(screen, message)
+
+			centerRow -= row_resizer
+
+			if centerRow < 0 {
+				centerRow = 0
+			}
+
+			puts(screen, style, centerCol, centerRow, message)
+			screen.Show()
 		}
-	}()
-
-	<-quit
-
-	s.Fini()
+	}
 }
