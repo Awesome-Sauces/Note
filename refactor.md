@@ -6,4 +6,4 @@ write an actual buffer instead of fully loading the file.
 
 add AI.
 
-I think the ai should be done with a unix domain socket.
+I think the ai (local LLM) should be done with a unix domain socket.
