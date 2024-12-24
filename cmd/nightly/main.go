@@ -10,14 +10,18 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+const (
+	version                 = "NOTE v0.0.2"
+	version_position_center = 7 // for a full sized term
+
+	MODE_WAITING = 0
+	MODE_INSERT  = 1
+	MODE_COMMAND = 2
+)
+
 var CURRENT_NOTE_MODE = 0
 var CURSOR_POSITION_X = 0
 var CURSOR_POSITION_Y = 0
-
-const (
-	version                 = "NOTE v0.0.1"
-	version_position_center = 7 // for a full sized term
-)
 
 var TextBuffer = make([]rune, 0)
 
@@ -107,20 +111,37 @@ func main() {
 	}
 
 	version_centerRow, version_centerColumn := terminal.CenterPosition(screen, version)
-	version_centerRow -= version_position_center
+	version_centerRow -= int(float32(screenHeight) * 0.155555556)
 
 	version_tag := &terminal.ElementContent{
 		Style: tcell.StyleDefault.Foreground(tcell.ColorWhite),
 		X:     version_centerColumn,
-		Y:     version_centerRow,
+		Y:     max(version_centerRow, 0),
 		Text:  version,
 	}
 
-	if err := termEnv.TerminalEnvironment_set_ElementContent(0, version_tag); err != nil {
-		log.Fatalf("Failed to add element content: %v", err)
+	note_program_info := &terminal.ElementContent{
+		Style: tcell.StyleDefault.Foreground(tcell.ColorWhite),
+		X:     terminal.CenterColumnPosition(screen, "Note is open source and freely distributable"),
+		Y:     max(version_centerRow+2, 0),
+		Text:  "Note is open source and freely distributable",
 	}
 
-	if err := termEnv.TerminalEnvironment_set_ElementContent(1, command_line_content); err != nil {
+	//note_program_help
+
+	if len(filename) == 0 || filename == "" || filename == " " {
+		if version_centerRow > 0 && screenHeight >= 30 {
+			if err := termEnv.TerminalEnvironment_set_ElementContent(0, version_tag); err != nil {
+				log.Fatalf("Failed to add element content: %v", err)
+			}
+
+			if err := termEnv.TerminalEnvironment_set_ElementContent(1, note_program_info); err != nil {
+				log.Fatalf("Failed to add element content: %v", err)
+			}
+		}
+	}
+
+	if err := termEnv.TerminalEnvironment_set_ElementContent(5, command_line_content); err != nil {
 		log.Fatalf("Failed to add element content: %v", err)
 	}
 

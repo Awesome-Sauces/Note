@@ -22,6 +22,14 @@ func CenterPosition(s tcell.Screen, text string) (int, int) {
 	return row, col
 }
 
+func CenterColumnPosition(s tcell.Screen, text string) int {
+	screenWidth, _ := s.Size()
+	textWidth := runewidth.StringWidth(text)
+	col := (screenWidth - textWidth) / 2
+
+	return col
+}
+
 func FormattedPuts(s tcell.Screen, style tcell.Style, x, y int, str string) {
 	i := 0
 	var deferred []rune
