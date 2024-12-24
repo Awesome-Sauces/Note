@@ -175,6 +175,33 @@ MAIN_LOOP:
 
 		commands_UserKeyd(termEnv, event)
 	case *tcell.EventResize: // on application launch this is called
+
+		// horid impl
+		if len(filename) == 0 || filename == "" || filename == " " {
+			if _, screenHeight = termEnv.Screen().Size(); screenHeight >= 30 {
+
+				version_centerRow, version_centerColumn := terminal.CenterPosition(screen, version)
+				version_centerRow -= int(float32(screenHeight) * 0.155555556)
+
+				version_tag.X = version_centerColumn
+				version_tag.Y = max(version_centerRow, 0)
+
+				note_program_info.X = terminal.CenterColumnPosition(screen, "Note is open source and freely distributable")
+				note_program_info.Y = max(version_centerRow+2, 0)
+
+				if err := termEnv.TerminalEnvironment_set_ElementContent(0, version_tag); err != nil {
+					log.Fatalf("Failed to add element content: %v", err)
+				}
+
+				if err := termEnv.TerminalEnvironment_set_ElementContent(1, note_program_info); err != nil {
+					log.Fatalf("Failed to add element content: %v", err)
+				}
+			} else {
+				termEnv.TerminalEnvironment_remove_ElementContent(0)
+				termEnv.TerminalEnvironment_remove_ElementContent(1)
+			}
+		}
+
 		if err := DRAW_TO_SCREEN(termEnv); err != nil {
 			log.Fatalf("Failed to render screen: %v", err)
 		}

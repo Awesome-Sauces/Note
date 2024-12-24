@@ -58,6 +58,10 @@ func (te *TerminalEnvironment) TerminalEnvironment_set_ElementContent(ID int, co
 	return nil
 }
 
+func (te *TerminalEnvironment) TerminalEnvironment_remove_ElementContent(ID int) {
+	delete(te.elements, ID)
+}
+
 func (te *TerminalEnvironment) Fini() {
 	te.screen.Fini()
 }
