@@ -1,9 +1,24 @@
-switching from tview to tcell to have more customizability.
+I need to actually write legible code for a second.
 
-will allow really good styles.
+At this point it is horrible adding parts to this terminal
 
-write an actual buffer instead of fully loading the file.
 
-add AI.
+Best route would be to:
 
-I think the ai (local LLM) should be done with a unix domain socket.
+Enable easy text rendering.
+
+Im maybe thinking of a "pages" format.
+
+
+
+startup page, similar to NVIM startup page.
+
+Waits for input event then switches page.
+
+Page also handles events. A page can switch to another page, although
+upon switching the page the page will cease to exist.
+
+
+interface Page struct {
+    
+}
